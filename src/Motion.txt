@@ -1,0 +1,58 @@
+First window should show the following 
+
+Welcome Label
+Start button : open popup
+Exit button : closes app
+
+Having trouble getting the popup open
+
+
+
+Considerations:
+Making calibration a pop up
+
+
+Calibration time :10*
+Update interval after cal: 1*
+increase number size
+change number color on threshold
+
+# 29/11/2015
+
+not done 
+
+change number color on threshold
+does return clear everything??yes
+does reset also recal??yes
+consider resume button
+
+
+
+done :
+check app with random data
+increase number size
+Calibration time :10s
+Update interval after cal: 1s
+start:
+- progress bar animates  to 100%
+- change rate values from N/A to value after 10s
+- rate calculations start
+
+
+Stop 
+- cancel refreshes 
+-
+
+Reset:
+- zero rate value
+-
+
+# 30/11/2015
+send confirmation of reservation extension with Raymond
+meeting 16/12/2015 18:00
+mandatory bar meeting 23/12/2015
+meeting 3/01/2016
+
+need to fix:
+pressing reset before start does not recal
+trace all control variables
