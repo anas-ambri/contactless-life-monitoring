@@ -56,3 +56,4 @@ meeting 3/01/2016
 need to fix:
 pressing reset before start does not recal
 trace all control variables
+handle stop cancellation on transition from main- >start-> main doesnt work 

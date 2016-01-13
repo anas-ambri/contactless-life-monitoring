@@ -17,8 +17,20 @@ ticks=0 # total run time
 s_state=0 # screen state-> 0:welcome screen, 1: main screen
 heart=0.0# heart rate
 breath=0.0 # breathing rate
-h_buffer = [54.4,55.0, 60.5,67.8,65.3,66.2,63.1,63.8,70.0]
-b_buffer = [14.4,15.0, 12.5,17.8,15.3,16.2,13.1,13.8,20.0]
+# Debug values
+# optimal values
+#h_buffer = [54.4,55.0, 60.5,67.8,65.3,66.2,63.1,63.8,70.0]
+#b_buffer = [14.4,15.0, 12.5,17.8,15.3,16.2,13.1,13.8,20.0]
+
+# suboptimal values
+#h_buffer = [34.4,35.0, 40.5,37.8,25.3,26.2,23.1,33.8,35.0]
+#b_buffer = [8.4,9.0, 7.5,7.8,5.3,7.2,9.1,7.8,8.0]
+
+# over_optimal values
+h_buffer = [164.4,185.0, 190.5,187.8,195.3,186.2,183.1,183.8,185.0]
+b_buffer = [68.4,69.0, 67.5,67.8,75.3,67.2,59.1,67.8,68.0]
+
+
 i = 0
 first_v= True
 
