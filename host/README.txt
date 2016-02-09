@@ -1,0 +1,2 @@
+Vendor Id = 0x1FC9
+Product Id = 0x0081
