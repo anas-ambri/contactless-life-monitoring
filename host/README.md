@@ -1,5 +1,6 @@
 #Installation
 Need to install libusb and pyusb
+libusb doesn't work on mac osx
 
 #Board USB info
 Vendor Id = 0x1FC9
