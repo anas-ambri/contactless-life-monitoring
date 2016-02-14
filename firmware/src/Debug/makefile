@@ -23,25 +23,25 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: usbd_rom_hid_generic.axf
+all: contactless_monitor.axf
 
 # Tool invocations
-usbd_rom_hid_generic.axf: $(OBJS) $(USER_OBJS)
+contactless_monitor.axf: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: MCU Linker'
-	arm-none-eabi-gcc -nostdlib -L"C:\Users\Team04\Documents\LPCXpresso_8.0.0_526\workspace\lpc_chip_43xx\Debug" -L"C:\Users\Team04\Documents\LPCXpresso_8.0.0_526\workspace\lpc_board_ngx_xplorer_4330\Debug" -Xlinker -Map="usbd_rom_hid_generic.map" -Xlinker --gc-sections -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=softfp -mthumb -T "usbd_rom_hid_generic_Debug.ld" -o "usbd_rom_hid_generic.axf" $(OBJS) $(USER_OBJS) $(LIBS)
+	arm-none-eabi-gcc -nostdlib -L"C:\nxp\LPCXpresso_8.0.0_526\lpcxpresso\Examples\LPCOpen\lpcopen_2_12_lpcxpresso_ngx_xplorer_4330\lpc_chip_43xx\Debug" -L"C:\nxp\LPCXpresso_8.0.0_526\lpcxpresso\Examples\LPCOpen\lpcopen_2_12_lpcxpresso_ngx_xplorer_4330\lpc_board_ngx_xplorer_4330\Debug" -Xlinker -Map="contactless_monitor.map" -Xlinker --gc-sections -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=softfp -mthumb -T "usbd_rom_hid_generic_Debug.ld" -o "contactless_monitor.axf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 	$(MAKE) --no-print-directory post-build
 
 # Other Targets
 clean:
-	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) usbd_rom_hid_generic.axf
+	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) contactless_monitor.axf
 	-@echo ' '
 
 post-build:
 	-@echo 'Performing post-build steps'
-	-arm-none-eabi-size "usbd_rom_hid_generic.axf"; # arm-none-eabi-objcopy -v -O binary "usbd_rom_hid_generic.axf" "usbd_rom_hid_generic.bin" ; # checksum -p LPC4330 -d "usbd_rom_hid_generic.bin";
+	-arm-none-eabi-size "contactless_monitor.axf"; # arm-none-eabi-objcopy -v -O binary "contactless_monitor.axf" "contactless_monitor.bin" ; # checksum -p LPC4330 -d "contactless_monitor.bin";
 	-@echo ' '
 
 .PHONY: all clean dependents

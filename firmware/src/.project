@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>usbd_rom_hid_generic</name>
+	<name>contactless_monitor</name>
 	<comment></comment>
 	<projects>
 		<project>lpc_chip_43xx</project>

@@ -35,24 +35,22 @@
 #include "app_usbd_cfg.h"
 #include "hid_generic.h"
 
-/*****************************************************************************
- * Private types/enumerations/variables
- ****************************************************************************/
+//ADC private fields
+static uint16_t dataADC0;
+
+
+//USB private fields
 static USBD_HANDLE_T g_hUsb;
 
 /* Endpoint 0 patch that prevents nested NAK event processing */
 static uint32_t g_ep0RxBusy = 0;/* flag indicating whether EP0 OUT/RX buffer is busy. */
 static USB_EP_HANDLER_T g_Ep0BaseHdlr;	/* variable to store the pointer to base EP0 handler */
 
-/*****************************************************************************
- * Public types/enumerations/variables
- ****************************************************************************/
+
+//USB public fields
 const USBD_API_T *g_pUsbApi;
 
-/*****************************************************************************
- * Private functions
- ****************************************************************************/
-
+//USB private functions
 /* EP0_patch part of WORKAROUND for artf45032. */
 ErrorCode_t EP0_patch(USBD_HANDLE_T hUsb, void *data, uint32_t event)
 {
@@ -77,9 +75,7 @@ ErrorCode_t EP0_patch(USBD_HANDLE_T hUsb, void *data, uint32_t event)
 	return g_Ep0BaseHdlr(hUsb, data, event);
 }
 
-/*****************************************************************************
- * Public functions
- ****************************************************************************/
+//USB public functions
 
 /**
  * @brief	Handle interrupt from USB0
@@ -121,20 +117,13 @@ USB_INTERFACE_DESCRIPTOR *find_IntfDesc(const uint8_t *pDesc, uint32_t intfClass
 	return pIntfDesc;
 }
 
-/**
- * @brief	main routine for USB device example
- * @return	Function should not exit.
- */
-int main(void)
-{
+void setupUSB() {
+	
 	USBD_API_INIT_PARAM_T usb_param;
 	USB_CORE_DESCS_T desc;
 	ErrorCode_t ret = LPC_OK;
 	USB_CORE_CTRL_T *pCtrl;
 
-	/* Initialize board and chip */
-	SystemCoreClockUpdate();
-	Board_Init();
 
 	/* enable clocks and pinmux */
 	USB_init_pin_clk();
@@ -193,9 +182,54 @@ int main(void)
 			USBD_API->hw->Connect(g_hUsb, 1);
 		}
 	}
+}
+
+
+//ADC public functions
+
+
+void setupADC() {
+	DEBUGSTR("ADC sequencer demo\r\n");
+
+	ADC_CLOCK_SETUP_T setup;
+	/* Setup ADC for defaults*/
+	Chip_ADC_Init(LPC_ADC0, &setup);
+
+	/* Setup for maximum ADC clock rate */
+	Chip_ADC_SetSampleRate(LPC_ADC0, &setup, ADC_MAX_SAMPLE_RATE);
+
+	/* Setup for maximum resolution */
+	Chip_ADC_SetResolution(LPC_ADC0, &setup, ADC_10BITS);
+
+	Chip_ADC_EnableChannel(LPC_ADC0, ADC_CH0, ENABLE);
+
+}
+
+/**
+ * @brief	main routine for program
+ * @return	Function should not exit.
+ */
+int main(void)
+{
+	/* Initialize board and chip */
+	SystemCoreClockUpdate();
+	Board_Init();
+
+	setupUSB();
+	setupADC();
+
 
 	while (1) {
 		/* Sleep until next IRQ happens */
-		__WFI();
+		//__WFI();
+
+		/* Start A/D conversion */
+		Chip_ADC_SetStartMode(LPC_ADC0, ADC_START_NOW, ADC_TRIGGERMODE_RISING);
+
+		/* Waiting for A/D conversion complete */
+		while (Chip_ADC_ReadStatus(LPC_ADC0, ADC_CH0, ADC_DR_DONE_STAT) != SET);
+
+		/* Read ADC value */
+		Chip_ADC_ReadValue(LPC_ADC0, ADC_CH0, &dataADC0);
 	}
 }
