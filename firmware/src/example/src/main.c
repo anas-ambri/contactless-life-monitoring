@@ -230,7 +230,7 @@ void setupADC() {
 //LED functions
 
 void flashLED() {
-	int x = 1000;
+	int x = 1000000;
 	Board_LED_Set(0, true);
 	while (x > 0) {
 		x--;
@@ -340,6 +340,8 @@ int main(void) {
 	sendBitsToPLL(R0);
 
 	stopPLLProgramming();
+
+	flashLED();
 
 	while (1) {
 		/* Sleep until next IRQ happens */
