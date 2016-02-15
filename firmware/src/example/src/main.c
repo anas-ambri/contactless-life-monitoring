@@ -35,38 +35,64 @@
 #include "app_usbd_cfg.h"
 #include "hid_generic.h"
 
+//#define MUXOUT
+//#define TEST_FREQ
+
+//PLL programming bits
+static uint32_t R7 = 0x00000007;
+static uint32_t R6_1 = 0x00030D46;
+static uint32_t R6_2 = 0x00830D46;
+
+#ifdef TEST_FREQ
+static uint32_t R5_1 = 0x0600FBAD;
+static uint32_t R5_2 = 0x0680FBAD;
+#else
+static uint32_t R5_1 = 0x0800FBAD;
+static uint32_t R5_2 = 0x0880FBAD;
+#endif
+
+#ifdef MUXOUT
+static uint32_t R4 = 0x01860084;
+#else
+static uint32_t R4 = 0x01980084;
+#endif
+static uint32_t R3 = 0x00008063;
+static uint32_t R2 = 0x0F408012;
+static uint32_t R1 = 0x00000001;
+#ifdef MUXOUT
+static uint32_t R0 = 0xF8394000;
+#else
+static uint32_t R0 = 0x80394000;
+#endif
+
 //ADC private fields
 static uint16_t dataADC0;
-
 
 //USB private fields
 static USBD_HANDLE_T g_hUsb;
 
 /* Endpoint 0 patch that prevents nested NAK event processing */
 static uint32_t g_ep0RxBusy = 0;/* flag indicating whether EP0 OUT/RX buffer is busy. */
-static USB_EP_HANDLER_T g_Ep0BaseHdlr;	/* variable to store the pointer to base EP0 handler */
-
+static USB_EP_HANDLER_T g_Ep0BaseHdlr; /* variable to store the pointer to base EP0 handler */
 
 //USB public fields
 const USBD_API_T *g_pUsbApi;
 
 //USB private functions
 /* EP0_patch part of WORKAROUND for artf45032. */
-ErrorCode_t EP0_patch(USBD_HANDLE_T hUsb, void *data, uint32_t event)
-{
+ErrorCode_t EP0_patch(USBD_HANDLE_T hUsb, void *data, uint32_t event) {
 	switch (event) {
 	case USB_EVT_OUT_NAK:
 		if (g_ep0RxBusy) {
 			/* we already queued the buffer so ignore this NAK event. */
 			return LPC_OK;
-		}
-		else {
+		} else {
 			/* Mark EP0_RX buffer as busy and allow base handler to queue the buffer. */
 			g_ep0RxBusy = 1;
 		}
 		break;
 
-	case USB_EVT_SETUP:	/* reset the flag when new setup sequence starts */
+	case USB_EVT_SETUP: /* reset the flag when new setup sequence starts */
 	case USB_EVT_OUT:
 		/* we received the packet so clear the flag. */
 		g_ep0RxBusy = 0;
@@ -81,8 +107,7 @@ ErrorCode_t EP0_patch(USBD_HANDLE_T hUsb, void *data, uint32_t event)
  * @brief	Handle interrupt from USB0
  * @return	Nothing
  */
-void USB_IRQHandler(void)
-{
+void USB_IRQHandler(void) {
 	USBD_API->hw->ISR(g_hUsb);
 }
 
@@ -90,8 +115,8 @@ void USB_IRQHandler(void)
  * @brief	Find the address of interface descriptor for given class type.
  * @return	If found returns the address of requested interface else returns NULL.
  */
-USB_INTERFACE_DESCRIPTOR *find_IntfDesc(const uint8_t *pDesc, uint32_t intfClass)
-{
+USB_INTERFACE_DESCRIPTOR *find_IntfDesc(const uint8_t *pDesc,
+		uint32_t intfClass) {
 	USB_COMMON_DESCRIPTOR *pD;
 	USB_INTERFACE_DESCRIPTOR *pIntfDesc = 0;
 	uint32_t next_desc_adr;
@@ -118,12 +143,11 @@ USB_INTERFACE_DESCRIPTOR *find_IntfDesc(const uint8_t *pDesc, uint32_t intfClass
 }
 
 void setupUSB() {
-	
+
 	USBD_API_INIT_PARAM_T usb_param;
 	USB_CORE_DESCS_T desc;
 	ErrorCode_t ret = LPC_OK;
 	USB_CORE_CTRL_T *pCtrl;
-
 
 	/* enable clocks and pinmux */
 	USB_init_pin_clk();
@@ -161,20 +185,20 @@ void setupUSB() {
 	if (ret == LPC_OK) {
 
 		/*	WORKAROUND for artf45032 ROM driver BUG:
-		    Due to a race condition there is the chance that a second NAK event will
-		    occur before the default endpoint0 handler has completed its preparation
-		    of the DMA engine for the first NAK event. This can cause certain fields
-		    in the DMA descriptors to be in an invalid state when the USB controller
-		    reads them, thereby causing a hang.
+		 Due to a race condition there is the chance that a second NAK event will
+		 occur before the default endpoint0 handler has completed its preparation
+		 of the DMA engine for the first NAK event. This can cause certain fields
+		 in the DMA descriptors to be in an invalid state when the USB controller
+		 reads them, thereby causing a hang.
 		 */
-		pCtrl = (USB_CORE_CTRL_T *) g_hUsb;	/* convert the handle to control structure */
+		pCtrl = (USB_CORE_CTRL_T *) g_hUsb; /* convert the handle to control structure */
 		g_Ep0BaseHdlr = pCtrl->ep_event_hdlr[0];/* retrieve the default EP0_OUT handler */
 		pCtrl->ep_event_hdlr[0] = EP0_patch;/* set our patch routine as EP0_OUT handler */
 
-		ret = usb_hid_init(g_hUsb,
-						   (USB_INTERFACE_DESCRIPTOR *) &USB_FsConfigDescriptor[sizeof(USB_CONFIGURATION_DESCRIPTOR)],
-						   &usb_param.mem_base,
-						   &usb_param.mem_size);
+		ret =
+				usb_hid_init(g_hUsb,
+						(USB_INTERFACE_DESCRIPTOR *) &USB_FsConfigDescriptor[sizeof(USB_CONFIGURATION_DESCRIPTOR)],
+						&usb_param.mem_base, &usb_param.mem_size);
 		if (ret == LPC_OK) {
 			/*  enable USB interrrupts */
 			NVIC_EnableIRQ(LPC_USB_IRQ);
@@ -184,9 +208,7 @@ void setupUSB() {
 	}
 }
 
-
 //ADC public functions
-
 
 void setupADC() {
 	DEBUGSTR("ADC sequencer demo\r\n");
@@ -205,29 +227,129 @@ void setupADC() {
 
 }
 
+//LED functions
+
+void flashLED() {
+	int x = 1000;
+	Board_LED_Set(0, true);
+	while (x > 0) {
+		x--;
+	}
+	Board_LED_Set(0, false);
+}
+
+
+//PLL functions
+
+#define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
+
+void sendBitsToPLL(uint32_t bits) {
+	//When sending data, we send always to GPIO5[5]
+	int k;
+	for(k = 0; k < 32; ++k) {
+		if (CHECK_BIT(bits, k)) {
+			Chip_GPIO_SetPinOutHigh(LPC_GPIO_PORT, 5, 5);
+		} else {
+			Chip_GPIO_SetPinOutLow(LPC_GPIO_PORT, 5, 5);
+		}
+	}
+}
+
+
+void setupPLLProgramming() {
+	//Configure the pins as IO
+	//ADF_MUXOUT <-> GPIO5[2]
+	//ADF_DATA   <-> GPIO5[5]
+	//ADF_LE     <-> GPIO5[7]
+	//ADF_CE     <-> GPIO0[9]
+	Chip_SCU_PinMuxSet(5, 2, SCU_PINIO_FAST); //5_2
+	Chip_SCU_PinMuxSet(5, 5, SCU_PINIO_FAST); //5_5
+	Chip_SCU_PinMuxSet(5, 7, SCU_PINIO_FAST); //5_7
+	Chip_SCU_PinMuxSet(0, 9, SCU_PINIO_FAST); //0_9
+
+	//Configure pins as output or input
+	//Only muxout is input
+	Chip_GPIO_SetPinDIRInput(LPC_GPIO_PORT, 5, 2);
+	//Other are output
+	Chip_GPIO_SetPinDIROutput(LPC_GPIO_PORT, 5, 5);
+	Chip_GPIO_SetPinDIROutput(LPC_GPIO_PORT, 5, 7);
+	Chip_GPIO_SetPinDIROutput(LPC_GPIO_PORT, 0, 9);
+}
+
+void getClocks() {
+	//find rates of various clocks
+	//to see the values on your chip, halt the program and read these variables
+	volatile static long int sysCoreClk = 0, maxSysClk = MAX_CLOCK_FREQ,
+			mainPllClk = 0;
+	volatile static long int chipBaseClk = 0, mainPllDivisor = 0, xtalClk = 0;
+	volatile static long int periphBaseClk = 0, spifiBaseClk = 0, hsadcBaseClk =
+			0, usbBaseClk = 0;
+	volatile static long int spifiClk = 0, hsadcClk = 0, usbClk = 0,
+			gpioClk = 0;
+	uint32_t sysCoreClk1 = 0;
+	sysCoreClk1 = Chip_Clock_GetRate(CLK_MX_MXCORE);
+	sysCoreClk = (long int) sysCoreClk1;
+	mainPllClk = (long int) Chip_Clock_GetMainPLLHz();
+	chipBaseClk = (long int) Chip_Clock_GetBaseClocktHz(CLKIN_CLKIN);
+	mainPllDivisor = (long int) Chip_Clock_GetDividerDivisor(CLKIN_MAINPLL);
+	xtalClk = (long int) Chip_Clock_GetClockInputHz(CLKIN_CRYSTAL);
+	periphBaseClk = (long int) Chip_Clock_GetBaseClocktHz(CLK_BASE_PERIPH);
+	spifiBaseClk = (long int) Chip_Clock_GetBaseClocktHz(CLK_BASE_SPIFI);
+	spifiClk = Chip_Clock_GetRate(CLK_MX_SPIFI);
+	hsadcBaseClk = (long int) Chip_Clock_GetBaseClocktHz(CLK_BASE_ADCHS);
+	hsadcClk = Chip_Clock_GetRate(CLK_MX_ADCHS);
+	usbBaseClk = (long int) Chip_Clock_GetBaseClocktHz(CLK_BASE_ADCHS);
+	usbClk = Chip_Clock_GetRate(CLK_MX_USB0);
+	gpioClk = Chip_Clock_GetRate(CLK_MX_GPIO);
+}
+
+void startPLLProgramming() {
+	Chip_GPIO_SetPinOutLow(LPC_GPIO_PORT, 5, 7);
+}
+
+void stopPLLProgramming() {
+	Chip_GPIO_SetPinOutLow(LPC_GPIO_PORT, 5, 7);
+}
+
 /**
  * @brief	main routine for program
  * @return	Function should not exit.
  */
-int main(void)
-{
+int main(void) {
 	/* Initialize board and chip */
 	SystemCoreClockUpdate();
 	Board_Init();
 
 	setupUSB();
 	setupADC();
+	setupPLLProgramming();
 
+	//Flash to signal beginning of setup
+	flashLED();
+
+	startPLLProgramming();
+	sendBitsToPLL(R7);
+	sendBitsToPLL(R6_1);
+	sendBitsToPLL(R6_2);
+	sendBitsToPLL(R5_1);
+	sendBitsToPLL(R5_2);
+	sendBitsToPLL(R4);
+	sendBitsToPLL(R3);
+	sendBitsToPLL(R2);
+	sendBitsToPLL(R1);
+	sendBitsToPLL(R0);
+
+	stopPLLProgramming();
 
 	while (1) {
 		/* Sleep until next IRQ happens */
 		//__WFI();
-
 		/* Start A/D conversion */
 		Chip_ADC_SetStartMode(LPC_ADC0, ADC_START_NOW, ADC_TRIGGERMODE_RISING);
 
 		/* Waiting for A/D conversion complete */
-		while (Chip_ADC_ReadStatus(LPC_ADC0, ADC_CH0, ADC_DR_DONE_STAT) != SET);
+		while (Chip_ADC_ReadStatus(LPC_ADC0, ADC_CH0, ADC_DR_DONE_STAT) != SET)
+			;
 
 		/* Read ADC value */
 		Chip_ADC_ReadValue(LPC_ADC0, ADC_CH0, &dataADC0);
