@@ -4,7 +4,6 @@ SCK   -> 200MHz
 5[2] outputs 3.1
 5[5] outputs 5
 5[7] outputs 0.7
-5[7] outputs 0.7
 0[9] outputs 0.7
 0[8] outputs 3.3
 1[9] outputs 3.3
@@ -18,3 +17,12 @@ SCK   -> 200MHz
 1[1] outputs 3.1 with 0.5 pk-pk
 1[13] outputs 0.6
 1[11] outputs 3.3
+
+The good ones:
+0[2]
+1[12]
+5[0]
+0[3]
+0[1]
+0[0]
+
