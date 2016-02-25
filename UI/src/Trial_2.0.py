@@ -9,6 +9,9 @@ from kivy.uix.widget import Widget
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.progressbar import ProgressBar
 from kivy.properties import NumericProperty, BooleanProperty ,StringProperty,ListProperty
+
+
+
 import sys
 import time
 
@@ -71,56 +74,71 @@ Builder.load_string("""
         GridLayout:
             id: Heart_layout
             cols:1
-            rows:2
-            pos:(root.width/2)-200,((root.height/2)+100)
+            #default design
+            rows:3
+            #pending  design
+            #
+            #pos:(root.width/2)-200,(root.height/2)+150)
+            pos:150,(root.height/2)+150
             col_default_width: 100
             row_default_width: 50
+            row_default_height: 100
             
-           
             Label:
                 text:'Heart Rate :'
                 color: 0,255,255,1
                 bold: True
-                
+
+            Image:
+                source: '..\Icons\heart2.gif'
+                size: 75,75
             Label:
                 
                 text: root.heart_rate
                 id: heart_label
                 color: root.h_monitor
-                font_size:'70sp'
+                font_size:'125sp'
+               
                 
 
         GridLayout:
             id: Breath_layout
             cols:1
-            rows:2
-            pos:(root.width/2)+200,((root.height/2)+100)
+            rows:3
+            #pos:(root.width/2)+200,((root.height/2)+150)
+            pos: (root.width-250),((root.height/2)+150)
             col_default_width: 100
             row_default_width: 50
+            row_default_height: 100
             
             Label:
                 text: 'Breathing Rate :'
                 color: 0,255,255,1
                 bold: True
+
+            Image:
+                source: '..\Icons\lungs2.gif'
+                size: 75,75
+                
             Label:
                 text: root.breath_rate
                 id: chest_label
                 color: root.b_monitor
-                font_size:'70sp'
+                font_size:'125sp'
 
-        Label:
-            text: 'Calibration @ :{}%'.format(int(cal_prog.value))
-            size_hint_x:None
-            font_size:'25sp'
-            pos:(root.width/2)-20,200
+        #Label:
+            #text: 'Calibration @ :{}%'.format(int(cal_prog.value))
+            #size_hint_x:None
+            #font_size:'25sp'
+            #pos:(root.width/2)-20,200
 
         
-        ProgressBar:
-            pos:(root.width/2)-40,150
-            id: cal_prog
-            size_hint_x: 1.0
-            size_hint_y: None
-            value: root.cal_progress
+        #ProgressBar:
+            #pos:(root.width/2)-40,150
+            #id: cal_prog
+            #size_hint_x: 1.0
+            #size_hint_y: None
+            #value: root.cal_progress
             
         Button:
             text: 'Start'
@@ -137,14 +155,14 @@ Builder.load_string("""
             size: 80,40
             pos: (root.width/4)-40,50
             color: 153, 153, 102
-            on_press:
-                root.stop_refresh(self, *args)
+            #on_press:
+                #root.stop_refresh(self, *args)
             
         
 
         Button:
-            text: 'Reset'
-            size: 80,40
+            text: 'New Patient'
+            size: 150,40
             pos: (root.width * 3/4)-40,50
             color: 153, 153, 102
             on_release:
@@ -160,6 +178,7 @@ Builder.load_string("""
                 root.manager.transition.direction = 'right'
                 root.manager.current = 'menu'
                 root.setwelcstate(self,*args)
+
 """)
 
 
@@ -321,7 +340,7 @@ sm.add_widget(MainScreen(name='settings'))
 class TestApp(App):
       
     title = 'cVitals'
-    icon = '..\Icons\cVitals-icon3.png'
+    #icon = '..\Icons\cVitals-icon3.png'
     def build(self):
         #Clock.schedule_interval(tickup, 1)
          
