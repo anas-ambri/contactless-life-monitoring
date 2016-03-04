@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 from collections import deque
 import math
-
+import scipy.fftpack
 
 
 
@@ -32,7 +32,7 @@ print('rate:',fs);
 
 # slide variables
 samp_slide = 1000
-samp_min =6324
+samp_min =13324
 count = 0
 #samp_queue = []
 samp_queue = deque([])
@@ -42,7 +42,7 @@ samp_queue = deque([])
 
 wav_len =300000000/float(fs)# fs corresponds to signal frq
 
-while len(samp_queue)<3:
+while len(samp_queue)<7:
     #global samp_slide,samp_min,samp_queue
     dat_sample = data[samp_min:samp_min+samp_slide]
     
@@ -60,9 +60,10 @@ while len(samp_queue)<3:
         hold.append(val)
     #samp_queue.append(dat_sample)
     samp_queue.append(hold)
-    print 'queue size:',len(samp_queue)
-    print 'Slot #:',count
-    print samp_queue[count]
+    # print samples
+    #print 'queue size:',len(samp_queue)
+    #print 'Slot #:',count
+    #print samp_queue[count]
     count+=1
     samp_min+=samp_slide
     
@@ -87,13 +88,13 @@ for x in range (0,len(samp_queue)-1):
     w2 = np.array(samp_queue[x+1])
     w3 = w1-w2
     diff_queue.append(w3)
-    print 'Diff[',x,']: ', diff_queue[x]
+    #print 'Diff[',x,']: ', diff_queue[x]
 
 # vital radio modified data- stage 1- diff matrix
-f=plt.figure(6)
-plt.title('diff wav..')
-plt.plot(diff_queue[0])
-f.show()
+#f=plt.figure(6)
+#plt.title('diff wav..')
+#plt.plot(diff_queue[0])
+#f.show()
 
 # TODO -- fix "not responding" matplotlib
 #plt.ion()
@@ -110,14 +111,45 @@ for x in range(1, len(diff_queue)):
     d1 = np.array(diff_queue[x])
     avg_sample = avg_sample + d1
 
+#  x axis numbers 
+dt = 0.01
+t= np.arange(0.0, 12.5,0.0125)
+#t= np.arange(0.0, 10.0,dt)
 
 avg = [x/len(diff_queue) for x in avg_sample]
+
+#x_avg = [(60* x)/ 2* math.pi for x in avg]
+
+
+#j=plt.figure(7)
+#plt.title('avg wav..')
+#plt.plot(t,avg)
+#plt.plot(x_avg)
+#j.show()
+
+fft_avg = scipy.fftpack.fft(avg,len(avg))
+freq = np.fft.fftfreq(len(fft_avg), dt)
+print "Avg length: ", len(fft_avg)
+print "freq length: ",len(freq)
+
+k=plt.figure(8)
+plt.title('avg fft wav..')
+#plt.plot(t,avg)
+
+#plt.plot(freq[len(freq/2):],fft_avg[len(fft_avg)/2:])
+plt.plot(freq[:len(freq)/2],abs(fft_avg[:len(fft_avg)/2]))
+plt.xlabel('f (Hz)')
+plt.ylabel('|Avg_fft|')
+k.show()
+#print fft_avg
+
+
     
 # vital radio modified data- stage 1- diff matrix avg
-#f=plt.figure(7)
+#j=plt.figure(7)
 #plt.title('avg wav..')
 #plt.plot(avg)
-#f.show()
+#j.show()
 
 
 

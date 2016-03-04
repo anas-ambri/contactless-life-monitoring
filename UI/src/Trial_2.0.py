@@ -22,16 +22,16 @@ heart=0.0# heart rate
 breath=0.0 # breathing rate
 # Debug values
 # optimal values
-#h_buffer = [54.4,55.0, 60.5,67.8,65.3,66.2,63.1,63.8,70.0]
-#b_buffer = [14.4,15.0, 12.5,17.8,15.3,16.2,13.1,13.8,20.0]
+h_buffer = [54.4,55.0, 60.5,67.8,65.3,66.2,63.1,63.8,70.0]
+b_buffer = [14.4,15.0, 12.5,17.8,15.3,16.2,13.1,13.8,20.0]
 
 # suboptimal values
 #h_buffer = [34.4,35.0, 40.5,37.8,25.3,26.2,23.1,33.8,35.0]
 #b_buffer = [8.4,9.0, 7.5,7.8,5.3,7.2,9.1,7.8,8.0]
 
 # over_optimal values
-h_buffer = [164.4,185.0, 190.5,187.8,195.3,186.2,183.1,183.8,185.0]
-b_buffer = [68.4,69.0, 67.5,67.8,75.3,67.2,59.1,67.8,68.0]
+#h_buffer = [164.4,185.0, 190.5,187.8,195.3,186.2,183.1,183.8,185.0]
+#b_buffer = [68.4,69.0, 67.5,67.8,75.3,67.2,59.1,67.8,68.0]
 
 
 i = 0
@@ -44,28 +44,47 @@ Builder.load_string("""
 <WelcomeScreen>:
     Widget:
         Button:
-            size: 80,40
-            text: 'Enter'
-            pos: 50,50
+            text: 'Start'
+       #     size: 100,50
+            size: 200,50
+            font_size:'20sp'
+       #     pos: 80,50
+       #     pos: (root.width/2)-50,50
+            pos: (root.width/2)-100,75
             color: 153, 153, 102
+            bold: True
             on_press:
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'settings'
                 root.setmainstate(self,*args)
-        Button:
-            text: 'Quit'
-            size: 80,40
-            color: 153, 153, 102
-            pos: root.width-130,50
-            on_press:root.close(self,*args)
+        #Button:
+        #    text: 'Quit'
+        #    size: 100,50
+        #    font_size:'20sp'
+        #    pos: root.width-130,50
+        #    color: 153, 153, 102
+        #    bold: True
+        #    on_press:root.close(self,*args)
             
         Label:
             text:'cVitals'
-            font_size:'50sp'
-            
+            font_size:'125sp'
             color: 0,255,255,1
             bold:True
-            pos: (root.width/2)-50,root.height/2
+            pos: (root.width/2)-50,(root.height/2)+100
+        # Image made by Freepik at:http://www.flaticon.com/free-icon/fingerprint-heart-shape_32692
+        
+        #Image:
+        #    source: '..\Icons\shape.png'
+        #    size: 150,150
+        #    pos: (root.width/2) -75, 200
+                
+        # Image made by Freepik: http://www.flaticon.com/free-icon/heart-checkup_33149
+        Image:
+            source: '..\Icons\medical.png'
+            size: 150,150
+            pos: (root.width/2) -75, 200
+
 
 <MainScreen>:
     Widget:
@@ -80,6 +99,7 @@ Builder.load_string("""
             #
             #pos:(root.width/2)-200,(root.height/2)+150)
             pos:150,(root.height/2)+150
+            font_size:'40sp'
             col_default_width: 100
             row_default_width: 50
             row_default_height: 100
@@ -90,7 +110,10 @@ Builder.load_string("""
                 bold: True
 
             Image:
-                source: '..\Icons\heart2.gif'
+                #source: '..\Icons\heart2.gif'
+                
+                #http://www.flaticon.com/free-icon/heart-black-shape_46029
+                source: '..\Icons\heart-black-shape.png'
                 size: 75,75
             Label:
                 
@@ -107,17 +130,25 @@ Builder.load_string("""
             rows:3
             #pos:(root.width/2)+200,((root.height/2)+150)
             pos: (root.width-250),((root.height/2)+150)
+            font_size:'40sp'
             col_default_width: 100
             row_default_width: 50
             row_default_height: 100
             
             Label:
                 text: 'Breathing Rate :'
+                font_size:'15sp'
                 color: 0,255,255,1
                 bold: True
 
             Image:
-                source: '..\Icons\lungs2.gif'
+                #source: '..\Icons\lungs2.gif'
+
+                #http://www.flaticon.com/free-icon/breath-control_95799
+                #source: '..\Icons\breath-control.png'
+
+                #http://www.flaticon.com/free-icon/lungs-silhouette_45987
+                source: '..\Icons\lungs-silhouette.png'
                 size: 75,75
                 
             Label:
@@ -125,13 +156,77 @@ Builder.load_string("""
                 id: chest_label
                 color: root.b_monitor
                 font_size:'125sp'
+        
+        Label:
+        #    text: 'Calibration :{}%'.format(int(cal_prog.value))# cal_prog is an id
+            text: root.cal_display
+            size_hint_x:None
+            font_size:'25sp'
+            bold: True
+            pos:(root.width/2)-50,150
 
-        #Label:
-            #text: 'Calibration @ :{}%'.format(int(cal_prog.value))
-            #size_hint_x:None
-            #font_size:'25sp'
-            #pos:(root.width/2)-20,200
+        
+        ProgressBar:
+            pos:(root.width/2)-125,150
+            id: cal_prog
+            size_hint_x: 1.0
+            size_hint_y: None
+            size: 250,10
+            value: root.cal_progress
+            
+        Button:
+            id: all_start
+            text: 'New Patient'
+            size: 150,50
+            font_size:'20sp'
+            pos: (root.width/2)-275,50
+            color: 153, 153, 102
+            bold: True
+            on_press:
+                #root.start_cal(self, *args)
+                root.resetrates(self, *args)
+                #root.cal_pop.open()
 
+        #Button:
+        #    text: 'Stop'
+        #    size: 80,40
+        #    pos: (root.width/4)-40,50
+        #    color: 153, 153, 102
+            #on_press:
+                #root.stop_refresh(self, *args)
+                
+            
+        
+
+        #Button:
+        #    text: 'New Patient'
+        #    size: 150,40
+        #    pos: (root.width * 3/4)-40,50
+        #    color: 153, 153, 102
+        #    on_release:
+        #        root.resetrates(self, *args)
+            
+        Button:
+            id:bye_felicia
+            text: 'Return'
+            size: 150,50
+            font_size:'20sp'
+            color: 153, 153, 102
+            pos: (root.width-275),50
+            bold: True
+            on_press:
+                root.return_clear(self,*args)
+                root.manager.transition.direction = 'right'
+                root.manager.current = 'menu'
+                root.setwelcstate(self,*args)
+
+
+    #Popup:
+        #id: cal_pop
+        #title: 'Calibration :{}%'.format(int(cal_prog.value))
+        #pos:(root.width/2)-40,150
+        #size_hint:None, None
+        #size: 250,40
         
         #ProgressBar:
             #pos:(root.width/2)-40,150
@@ -140,44 +235,6 @@ Builder.load_string("""
             #size_hint_y: None
             #value: root.cal_progress
             
-        Button:
-            text: 'Start'
-            id: all_start
-            size: 80,40
-            pos: 50,50
-            color: 153, 153, 102
-            on_press:
-                
-                root.start_cal(self, *args)
-
-        Button:
-            text: 'Stop'
-            size: 80,40
-            pos: (root.width/4)-40,50
-            color: 153, 153, 102
-            #on_press:
-                #root.stop_refresh(self, *args)
-            
-        
-
-        Button:
-            text: 'New Patient'
-            size: 150,40
-            pos: (root.width * 3/4)-40,50
-            color: 153, 153, 102
-            on_release:
-                root.resetrates(self, *args)
-            
-        Button:
-            text: 'Return'
-            size: 80,40
-            color: 153, 153, 102
-            pos: root.width-130,50
-            on_press:
-                root.return_clear(self,*args)
-                root.manager.transition.direction = 'right'
-                root.manager.current = 'menu'
-                root.setwelcstate(self,*args)
 
 """)
 
@@ -200,6 +257,7 @@ class MainScreen(Screen):
     heart_rate = StringProperty()
     breath_rate = StringProperty()
     cal_progress = NumericProperty(0)
+    cal_display = StringProperty()
     cal_start = BooleanProperty(False)
     cal_done = BooleanProperty(False)
 
@@ -214,8 +272,8 @@ class MainScreen(Screen):
 
     def __init__(self, **kwargs):
         super(MainScreen, self).__init__(**kwargs)
-        self.heart_rate = str('N/A')
-        self.breath_rate = str('N/A')
+        self.heart_rate = str('--')
+        self.breath_rate = str('--')
         self.cal_progress = 0
         self.cal_start = False
         self.cal_done = False
@@ -232,11 +290,19 @@ class MainScreen(Screen):
         #debug
         #print('cal_clock called')
         #print (self.cal_start)
+        if (not(self.cal_start)):
+            self.cal_display = str('')
+            #self.cal_display = str('Calibration :{}%'.format(int(self.cal_progress)))
         
         if (self.cal_progress <=100 and self.cal_start and not(self.cal_done)):
+            #self.cal_display = str('Calibration :{}%'.format(int(self.cal_progress)))
             self.cal_progress = (self.cal_progress+1)%101
+            self.cal_display = str('Calibration :{}%'.format(int(self.cal_progress)))
+
             if self.cal_progress==100:
+                #self.cal_display = str('Calibration :Done')
                 self.cal_done = True
+                self.cal_display = str('')
 
     # screen refresh every 1 sec
     def refresh_clock(self, *args):
@@ -259,7 +325,8 @@ class MainScreen(Screen):
 
     # On reset button press,effectively a recalibration
     def resetrates(self, *args):
-        print ('Log: Recalibration asserted')
+        #print ('Log: Recalibration asserted')
+        print ('Log: New Patient asserted')
         global heart
         global breath,first_v
         #self.return_clear(self,*args)
@@ -271,8 +338,8 @@ class MainScreen(Screen):
         self.h_monitor = [1,1,1,1]#[255,0,0,1]
         self.b_monitor =[1,1,1,1]#[255,0,0,1]
         first_v= True
-        self.heart_rate = str('N/A')
-        self.breath_rate = str('N/A')
+        self.heart_rate = str('--')
+        self.breath_rate = str('--')
         self.cal_progress = 0
         self.cal_start = False
         self.cal_done = False
@@ -287,11 +354,11 @@ class MainScreen(Screen):
         s_state = 0
 
     # On stop press suspend all logging and refreshing
-
-    def stop_refresh(self, *args):
-        self.can_refresh = False
-        self.accept_data = False
-        print ('Log: Refreshes disabled')
+    # "Stop" button discontinued
+    #def stop_refresh(self, *args):
+        #self.can_refresh = False
+        #self.accept_data = False
+        #print ('Log: Refreshes disabled')
         
     # calculate rates
     def ratecalculation(self, *args):
@@ -321,8 +388,8 @@ class MainScreen(Screen):
         self.h_monitor = [1,1,1,1]#[255,0,0,1]
         self.b_monitor =[1,1,1,1]#[255,0,0,1]
         first_v= True
-        self.heart_rate = str('N/A')
-        self.breath_rate = str('N/A')
+        self.heart_rate = str('--')
+        self.breath_rate = str('--')
         self.cal_progress = 0
         self.cal_start = False
         self.cal_done = False
@@ -341,6 +408,8 @@ class TestApp(App):
       
     title = 'cVitals'
     #icon = '..\Icons\cVitals-icon3.png'
+    #icon =  '..\Icons\shape_32.png'
+    icon =  '..\Icons\medical_32.png'
     def build(self):
         #Clock.schedule_interval(tickup, 1)
          
