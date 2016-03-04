@@ -10,12 +10,13 @@ extern TimerOne Timer1;
 
 #define DEBUG 1
 bool muxout = true;
+bool LESetup = false;
 
 unsigned long R7, R6_1, R6_2, R5_1, R5_2, R4, R3, R2, R1, R0, FLAG;
 
 const int MAX_BITS = 32;
 const int NUM_REGS = 10;
-int counter_clk_break = 1;
+int counter_clk_break = 2;
 int counterBit = MAX_BITS -1; //31 because 0-indexed
 int counter = 0;
 unsigned long regs[NUM_REGS]; 
@@ -52,7 +53,7 @@ void setup() {
 
   R3 = 32835; //00000000000000001000000001100011;
   R2 = 255885330; //00001111010000001000000000010010;
-  R1 = 1;//00000000000000000000000000000001;
+  R1 = 1;//00000000000000000000000000000001;2
 
   if (muxout) {
     R0 = 4164501504; //11111000001110010100000000000000;
@@ -60,6 +61,18 @@ void setup() {
     R0 = 2151235584; //10000000001110010100000000000000;
   }
   //FLAG = 0;
+  
+
+//  R7 = 7;
+//  R6_1 = 6;
+//  R6_2 = 8388614;
+//  R5_1 = 13421773;
+//  R5_2 = 142606341;
+//  R4 = 6291460;
+//  R3 = 32835;
+//  R2 = 255885314;
+//  R1 = 1;
+//  R0 = 2020999168;
   
   regs[0] = R7;
   regs[1] = R6_1;
@@ -135,7 +148,6 @@ void callback() {
           if(counter == NUM_REGS) {
             //counter_clk_break > 0 means we are on clk_break mode
             counter_clk_break = MAX_BITS - 1;
-            digitalWrite(ADF_CLK, LOW);   
           }
 
         }
