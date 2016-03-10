@@ -57,6 +57,8 @@ ErrorCode_t usb_hid_init(USBD_HANDLE_T hUsb,
 						 uint32_t *mem_base,
 						 uint32_t *mem_size);
 
+void sendInt(uint8_t data);
+
 /**
  * @}
  */

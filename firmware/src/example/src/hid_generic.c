@@ -113,7 +113,7 @@ static ErrorCode_t HID_Ep_Hdlr(USBD_HANDLE_T hUsb, void *data, uint32_t event)
 		USBD_API->hw->ReadEP(hUsb, pHidCtrl->epout_adr, loopback_report);
 		if (!report_pending) {
 			report_pending = 1;
-			USBD_API->hw->WriteEP(hUsb, pHidCtrl->epin_adr, loopback_report, 1);
+			USBD_API->hw->WriteEP(hUsb, pHidCtrl->epin_adr, &loopback_report, 1);
 		}
 		break;
 	}

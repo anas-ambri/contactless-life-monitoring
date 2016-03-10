@@ -30,6 +30,7 @@
  */
 
 #include "board.h"
+#include "usbd_rom_api.h"
 #include <stdio.h>
 #include <string.h>
 #include "app_usbd_cfg.h"
@@ -255,7 +256,6 @@ void sendBitsToPLL(uint32_t bits) {
 	}
 }
 
-
 void setupPLLProgramming() {
 	//Configure the pins as IO
 	//ADF_MUXOUT <-> GPIO5[2]
@@ -322,24 +322,24 @@ int main(void) {
 
 	setupUSB();
 	setupADC();
-	setupPLLProgramming();
+//	setupPLLProgramming();
 
 	//Flash to signal beginning of setup
 	flashLED();
 
-	startPLLProgramming();
-	sendBitsToPLL(R7);
-	sendBitsToPLL(R6_1);
-	sendBitsToPLL(R6_2);
-	sendBitsToPLL(R5_1);
-	sendBitsToPLL(R5_2);
-	sendBitsToPLL(R4);
-	sendBitsToPLL(R3);
-	sendBitsToPLL(R2);
-	sendBitsToPLL(R1);
-	sendBitsToPLL(R0);
+//	startPLLProgramming();
+//	sendBitsToPLL(R7);
+//	sendBitsToPLL(R6_1);
+//	sendBitsToPLL(R6_2);
+//	sendBitsToPLL(R5_1);
+//	sendBitsToPLL(R5_2);
+//	sendBitsToPLL(R4);
+//	sendBitsToPLL(R3);
+//	sendBitsToPLL(R2);
+//	sendBitsToPLL(R1);
+//	sendBitsToPLL(R0);
 
-	stopPLLProgramming();
+//	stopPLLProgramming();
 
 	flashLED();
 
@@ -355,5 +355,7 @@ int main(void) {
 
 		/* Read ADC value */
 		Chip_ADC_ReadValue(LPC_ADC0, ADC_CH0, &dataADC0);
+
+		USBD_API->hw->WriteEP(hUsb, pHidCtrl->epin_adr, &dataADC0, 1);
 	}
 }
