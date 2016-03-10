@@ -1,0 +1,2 @@
+TODO -- fix "not responding" matplotlib
+TODO -- handle removing 5 batches to make way for next 5

@@ -54,6 +54,19 @@ mandatory bar meeting 23/12/2015
 meeting 3/01/2016
 
 need to fix:
-pressing reset before start does not recal
+pressing reset before start does not recal**
 trace all control variables
-handle stop cancellation on transition from main- >start-> main doesnt work 
+handle stop cancellation on transition from main- >start-> main doesnt work **
+
+
+// breathin icons 
+icon by freepik at  http://www.flaticon.com/free-icon/breath-control_95799
+lungs : http://www.netanimations.net/Heart-beating-lungs-breathing-body-organ-animations.htm
+
+// heart icons 
+
+heart gif: http://www.amazing-animations.com/animated-hearts.php
+
+
+19/02/2016
+start if animation after calibration complete
