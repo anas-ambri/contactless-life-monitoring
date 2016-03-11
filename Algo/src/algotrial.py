@@ -6,43 +6,50 @@ import numpy as np
 from collections import deque
 import math
 import scipy.fftpack
+import time
 
 
+#mark time
+start_time = time.time() 
 
+#######################################
+# Aquire test samples from wav
+# 
+#
+#
+#######################################
 
 testfile = '../wavs/static2monoshort.wav'
 
 fs,data = wavfile.read(testfile)
 
-#np.array(data[1],dtype = float)
+
 
 dat_length = data.size     #
 #dat_sample = data[6324:6424]
-#dat_sample2 = data[6425:6525]
-#dat_sample3 = data[6324:7323]
-#dat_sample4 = data[7324:8323]
-#dat_diff = dat_sample - dat_sample2
-#dat_diff2 = dat_sample3 - dat_sample4
-#dat_Lchannel = data[:,0]
-
-
-
 print('length:',dat_length);
 print('rate:',fs);
 
 # slide variables
 samp_slide = 1000
-samp_min =13324
+samp_min =6324
 count = 0
 #samp_queue = []
 samp_queue = deque([])
 
+#########################################
+
 # read 6 sample batches
-# convert to phase 
+# convert to phase
+#fs corresponds to signal frq
+#wav_len corresponds to wavelength
 
-wav_len =300000000/float(fs)# fs corresponds to signal frq
+#########################################
 
-while len(samp_queue)<7:
+wav_len =300000000/float(fs)
+
+
+while len(samp_queue)<6:
     #global samp_slide,samp_min,samp_queue
     dat_sample = data[samp_min:samp_min+samp_slide]
     
@@ -56,9 +63,10 @@ while len(samp_queue)<7:
         # vital radio eq
         value = float((2* math.pi* dat_sample[x]))/wav_len
         # rounding values -- just for checking
-        val = float("{0:.4f}".format(value))
+        val = float("{0:.6f}".format(value))
         hold.append(val)
     #samp_queue.append(dat_sample)
+    hold2 =scipy.fftpack.fft(hold,len(hold))
     samp_queue.append(hold)
     # print samples
     #print 'queue size:',len(samp_queue)
@@ -112,54 +120,122 @@ for x in range(1, len(diff_queue)):
     avg_sample = avg_sample + d1
 
 #  x axis numbers 
-dt = 0.01
+dt = 0.0125
 t= np.arange(0.0, 12.5,0.0125)
-#t= np.arange(0.0, 10.0,dt)
+
 
 avg = [x/len(diff_queue) for x in avg_sample]
 
+# show me diff avg plot
+#l=plt.figure(7)
+#plt.title('avg wav..')
+#plt.plot(avg)
+#l.show()
+
 #x_avg = [(60* x)/ 2* math.pi for x in avg]
 
+#########################################
+# Testing Phase
+# get fft of diff avg
+# find if the peaks differ by 30%
+# if yes dump data
 
-#j=plt.figure(7)
-#plt.title('avg wav..')
-#plt.plot(t,avg)
+#########################################
+# test pendings starts
+#print "x_avg length: ", len(x_avg)
 #plt.plot(x_avg)
-#j.show()
+# test pendings ends
 
+#########################################
 fft_avg = scipy.fftpack.fft(avg,len(avg))
-freq = np.fft.fftfreq(len(fft_avg), dt)
+freq = np.fft.fftfreq(len(avg), dt)
 print "Avg length: ", len(fft_avg)
 print "freq length: ",len(freq)
 
-k=plt.figure(8)
-plt.title('avg fft wav..')
-#plt.plot(t,avg)
-
-#plt.plot(freq[len(freq/2):],fft_avg[len(fft_avg)/2:])
-plt.plot(freq[:len(freq)/2],abs(fft_avg[:len(fft_avg)/2]))
-plt.xlabel('f (Hz)')
-plt.ylabel('|Avg_fft|')
-k.show()
-#print fft_avg
-
-
-    
-# vital radio modified data- stage 1- diff matrix avg
+# show me fft_avg
 #j=plt.figure(7)
-#plt.title('avg wav..')
-#plt.plot(avg)
+#plt.title('fft_avg wav..')
+#plt.plot(t,fft_avg)
 #j.show()
 
+test =abs(fft_avg[:len(fft_avg)/2])
 
+# show me test
+#m=plt.figure(8)
+#plt.title('test..')
+#plt.plot(test)
+#m.show()
 
+# automated find of first max and preceeding max
+peak_value0 = np.amax(test)
+peak_index0 = np.argmax(test)
 
-#count =0
-#while (count<dat_length):
-    #print ('#',count, '   :', data[count])
-    #count+=1
+peak_value1 = np.amax(test[peak_index0+1:])
+peak_index1 = peak_index0+1+np.argmax(test[peak_index0+1:])# correct offset
+
+#check if index1 at proper index
+#print "test[",peak_index1 ,"]", test[peak_index1]
+print "1st max: ", peak_value0
+print "1st max index: ", peak_index0
+print "2nd max: ", peak_value1
+print "2nd max index: ", peak_index1
+
+margin = (peak_value0 - peak_value1)/peak_value0
+
+if (margin <0.3):
+    #test failed
+    # delete test 
+    print "Test failed"
+
+else:
+    # pass test on to next function
+    print "Test passed"
     
-#print (count);
+
+print "margin:" , margin
+
+
+
+
+########################################
+#Extraction phase
+# Use peaks from test
+#
+########################################
+
+
+#fft_avg = scipy.fftpack.ifft(avg,len(avg))
+#phase_avg = scipy.angle(fft_avg)
+#x_avg = [(60* x)/ 2* math.pi for x in fft_avg]
+
+#x_avg = [(60* x)/ 2* math.pi for x in phase_avg]
+
+#freq = np.fft.fftfreq(len(fft_avg), dt)
+
+
+
+
+# show me avg_fft 
+#k=plt.figure(8)
+#plt.title('avg fft wav..')
+#plt.plot(t,avg)
+
+
+#plt.plot(freq[:len(freq/2)],abs(x_avg[:len(x_avg)/2]))
+#plt.plot(x_avg[:len(x_avg)/2],abs(fft_avg[:len(fft_avg)/2]))
+#plt.xlabel('f (Hz)')
+#plt.ylabel('|Avg_fft|')
+#k.show()
+#print fft_avg
+
+# end of prog
+end_time = time.time()
+
+print "Exec:", end_time-start_time
+
+
+
+
 
 # fig prints 
 #f=plt.figure(1)
@@ -188,6 +264,3 @@ k.show()
 
 
 
-#print ('first :',data[6324:6424])
-#print ('first :',dat_Lchannel[6324:6424]);
-#print ('Diff:', dat_diff);
