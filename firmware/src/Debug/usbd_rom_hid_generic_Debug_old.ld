@@ -4,7 +4,7 @@
  * (c) NXP Semiconductors 2013-2016
  * Generated linker script file for LPC4330
  * Created from generic_c.ld (8.0.0 ())
- * By LPCXpresso v8.0.0 [Build 526] [2015-11-23]  on Wed Mar 09 23:48:51 EST 2016
+ * By LPCXpresso v8.0.0 [Build 526] [2015-11-23]  on Mon Mar 14 22:20:22 EDT 2016
  */
 
 
