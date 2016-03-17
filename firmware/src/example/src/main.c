@@ -364,7 +364,6 @@ void setupPLLProgramming() {
 	Chip_SCU_PinMuxSet(1, 15, SCU_MODE_FUNC0); //P1_15
 
 	//Configure pins as output
-//	Chip_GPIO_SetPinDIRInput(LPC_GPIO_PORT, 0, 7);
 	Chip_GPIO_SetPinDIROutput(LPC_GPIO_PORT, 5, 0);
 	Chip_GPIO_SetPinDIROutput(LPC_GPIO_PORT, 0, 3);
 	Chip_GPIO_SetPinDIROutput(LPC_GPIO_PORT, 1, 12);
@@ -426,8 +425,8 @@ int main(void) {
 
 	//flashLED();
 
-//	setupUSB();
-//	setupADC();
+	setupUSB();
+	setupADC();
 	setupPLLProgramming();
 	Board_Buttons_Init();
 
