@@ -19,7 +19,7 @@ const int NUM_REGS = 10;
 int counter_clk_break = 2;
 int counterBit = MAX_BITS -1; //31 because 0-indexed
 int counter = 0;
-unsigned long regs[NUM_REGS]; 
+unsigned long regs[NUM_REGS];
 
 void setup() {
   Serial.begin(9600);

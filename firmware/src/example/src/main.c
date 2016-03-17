@@ -364,7 +364,7 @@ void setupPLLProgramming() {
 	Chip_SCU_PinMuxSet(1, 15, SCU_MODE_FUNC0); //P1_15
 
 	//Configure pins as output
-	Chip_GPIO_SetPinDIRInput(LPC_GPIO_PORT, 0, 7);
+//	Chip_GPIO_SetPinDIRInput(LPC_GPIO_PORT, 0, 7);
 	Chip_GPIO_SetPinDIROutput(LPC_GPIO_PORT, 5, 0);
 	Chip_GPIO_SetPinDIROutput(LPC_GPIO_PORT, 0, 3);
 	Chip_GPIO_SetPinDIROutput(LPC_GPIO_PORT, 1, 12);
@@ -422,32 +422,42 @@ int main(void) {
 	/* Initialize board and chip */
 	SystemCoreClockUpdate();
 	Board_Init();
+	bool inDebugMode = FALSE;
 
 	//flashLED();
 
 //	setupUSB();
 //	setupADC();
 	setupPLLProgramming();
+	Board_Buttons_Init();
 
 	while (1) {
 		/* Sleep until next IRQ happens */
 		//__WFI();
 		/* Start A/D conversion */
-//		Chip_ADC_SetStartMode(LPC_ADC0, ADC_START_NOW, ADC_TRIGGERMODE_RISING);
-//
-//		/* Waiting for A/D conversion complete */
-//		while (Chip_ADC_ReadStatus(LPC_ADC0, ADC_CH0, ADC_DR_DONE_STAT) != SET)
-//			;
-//
-//		/* Read ADC value */
-//		Chip_ADC_ReadValue(LPC_ADC0, ADC_CH0, &dataADC0);
+		Chip_ADC_SetStartMode(LPC_ADC0, ADC_START_NOW, ADC_TRIGGERMODE_RISING);
+
+		/* Waiting for A/D conversion complete */
+		while (Chip_ADC_ReadStatus(LPC_ADC0, ADC_CH0, ADC_DR_DONE_STAT) != SET)
+			;
+
+		/* Read ADC value */
+		Chip_ADC_ReadValue(LPC_ADC0, ADC_CH0, &dataADC0);
 
 		if(isProgrammed) {
-			debugMode = Chip_GPIO_GetPinState(LPC_GPIO_PORT, 0, 7);
-			Board_LED_Set(1, TRUE);
-			if(debugMode) {
-				isProgrammed = FALSE;
-				setupPLLProgramming();
+//			debugMode = Chip_GPIO_GetPinState(LPC_GPIO_PORT, 0, 7);
+			if (!inDebugMode) {
+				debugMode = Buttons_GetStatus();
+				Board_LED_Set(1, TRUE);
+				if(debugMode) {
+					isProgrammed = FALSE;
+					currentRegister = 0;
+					inDebugMode = TRUE;
+					//				setupPLLProgramming();
+					setupPLLRegisters();
+				}
+			} else {
+				Board_LED_Set(0,TRUE);
 			}
 		}
 
