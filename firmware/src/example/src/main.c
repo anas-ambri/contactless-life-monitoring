@@ -443,6 +443,8 @@ int main(void) {
 		/* Read ADC value */
 		Chip_ADC_ReadValue(LPC_ADC0, ADC_CH0, &dataADC0);
 
+		sender_tasks(dataADC0);
+
 		if(isProgrammed) {
 //			debugMode = Chip_GPIO_GetPinState(LPC_GPIO_PORT, 0, 7);
 			if (!inDebugMode) {

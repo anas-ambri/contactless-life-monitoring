@@ -23,13 +23,6 @@ device = None
 
 def sample_handler(data):
     print("Raw data: {0}".format(data))
-    global device
-    report = device.find_output_reports()[0]
-    target_usage = hid.get_full_usage_id(0xff00, 0x01)
-    i = int(report[target_usage].get_value())
-    print i
-    report[target_usage] = i + 1
-    report.send()
 
 def raw_test():
     # simple test
@@ -59,12 +52,6 @@ def raw_test():
 
                 #set custom raw data handler
                 device.set_raw_data_handler(sample_handler)
-
-                report = device.find_output_reports()[0]
-                target_usage = hid.get_full_usage_id(0xff00, 0x01)
-                print target_usage
-                report[target_usage] = 1
-                report.send()
                 
                 print("\nWaiting for data...\nPress any (system keyboard) key to stop...")
                 while not kbhit() and device.is_plugged():
