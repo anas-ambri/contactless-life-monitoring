@@ -39,6 +39,12 @@ extern "C"
 {
 #endif
 
+#define DEVICE_BUFFER_SIZE                        2
+
+#define HID_CLEAR_REPORT(x)                memset(x, 0, DEVICE_BUFFER_SIZE);
+
+#define HID_REPORT_SET_VALUE(x, val)   x = (uint8_t) val;
+
 /** @ingroup EXAMPLES_USBDROM_18XX43XX_HID_GENERIC
  * @{
  */
@@ -57,7 +63,7 @@ ErrorCode_t usb_hid_init(USBD_HANDLE_T hUsb,
 						 uint32_t *mem_base,
 						 uint32_t *mem_size);
 
-void sendInt(uint8_t data);
+void sender_tasks(uint16_t data);
 
 /**
  * @}

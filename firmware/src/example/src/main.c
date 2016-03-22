@@ -36,35 +36,57 @@
 #include "app_usbd_cfg.h"
 #include "hid_generic.h"
 
-//#define MUXOUT
 //#define TEST_FREQ
 
 //PLL programming bits
-static uint32_t R7 = 0x00000007;
-static uint32_t R6_1 = 0x00030D46;
-static uint32_t R6_2 = 0x00830D46;
+#define MAX_BITS 32
+#define NUM_REGS 10
+static int16_t currentRegister = 0;
+static int16_t currentBit = MAX_BITS -1;
+static bool clkState = FALSE;
+
+static bool debugMode = FALSE;
+static bool isProgrammed = FALSE;
+
+static uint32_t R7 = 7;
+static uint32_t R6_1 = 200006;
+static uint32_t R6_2 = 8588614;
 
 #ifdef TEST_FREQ
-static uint32_t R5_1 = 0x0600FBAD;
-static uint32_t R5_2 = 0x0680FBAD;
+static uint32_t R5_1 = 100727725;
+static uint32_t R5_2 = 109116333;
 #else
-static uint32_t R5_1 = 0x0800FBAD;
-static uint32_t R5_2 = 0x0880FBAD;
+static uint32_t R5_1 = 134282157;
+static uint32_t R5_2 = 142670765;
 #endif
 
-#ifdef MUXOUT
-static uint32_t R4 = 0x01860084;
+#ifdef TEST_FREQ
+static uint32_t R4 = 5767300;
 #else
-static uint32_t R4 = 0x01980084;
+static uint32_t R4 = 26738820;
 #endif
-static uint32_t R3 = 0x00008063;
-static uint32_t R2 = 0x0F408012;
-static uint32_t R1 = 0x00000001;
-#ifdef MUXOUT
-static uint32_t R0 = 0xF8394000;
+static uint32_t R3 = 32835;
+static uint32_t R2 = 255885330;
+static uint32_t R1 = 1;
+#ifdef TEST_FREQ
+static uint32_t R0 = 4168253440;
 #else
-static uint32_t R0 = 0x80394000;
+static uint32_t R0 = 2154987520;
 #endif
+
+static uint32_t R7_debug = 7;
+static uint32_t R6_1_debug = 6;
+static uint32_t R6_2_debug = 8388614;
+static uint32_t R5_1_debug = 134217733;
+static uint32_t R5_2_debug = 142606341;
+static uint32_t R4_debug = 4;
+static uint32_t R3_debug = 32835;
+static uint32_t R2_debug = 255885314;
+static uint32_t R1_debug = 1;
+static uint32_t R0_debug = 7602176;
+
+
+static uint32_t regs[NUM_REGS];
 
 //ADC private fields
 static uint16_t dataADC0;
@@ -225,7 +247,6 @@ void setupADC() {
 	Chip_ADC_SetResolution(LPC_ADC0, &setup, ADC_10BITS);
 
 	Chip_ADC_EnableChannel(LPC_ADC0, ADC_CH0, ENABLE);
-
 }
 
 //LED functions
@@ -244,36 +265,124 @@ void flashLED() {
 
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
 
-void sendBitsToPLL(uint32_t bits) {
-	//When sending data, we send always to GPIO5[5]
-	int k;
-	for(k = 0; k < 32; ++k) {
-		if (CHECK_BIT(bits, k)) {
-			Chip_GPIO_SetPinOutHigh(LPC_GPIO_PORT, 5, 5);
+#define TICKRATE_HZ1 (1000)
+
+void SysTick_Handler(void) {
+
+	//Toggle clock
+
+	setPin(5, 0, !clkState);
+
+	if(!isProgrammed) {
+		//Board_LED_Set(1, TRUE);
+		if(clkState) {
+
+			if(currentRegister < NUM_REGS) {
+
+				if(currentBit == MAX_BITS - 1) {
+					//First bit in register, set LE to low
+					setPin(1, 12, FALSE);
+				}
+
+				//Write bit at position currentBit in the register
+				setPin(0, 3, (regs[currentRegister] >> (currentBit)) & 1); //DATA
+				currentBit--;
+
+			}
 		} else {
-			Chip_GPIO_SetPinOutLow(LPC_GPIO_PORT, 5, 5);
+
+			//If we got to the last bit on the register
+			if (currentBit < 0) {
+			    //we need to set LE to high
+				setPin(1, 12, TRUE);
+
+			    //Reset the position of the bit counter
+			    currentBit = MAX_BITS -1;
+			    //Move to the next register
+			    currentRegister++;
+
+			    if(currentRegister >= NUM_REGS) {
+			    	isProgrammed = TRUE;
+			    	if(!isProgrammed) {
+				    	currentRegister = 0;
+			    	}
+
+			    	//Board_LED_Set(1, FALSE);
+			    }
+			}
+
 		}
+	}
+
+	//Then toggle state of CLK
+	clkState = !clkState;
+}
+
+void setupPLLRegisters() {
+	if(debugMode) {
+		regs[0] = R7_debug;
+		regs[1] = R6_1_debug;
+		regs[2] = R6_2_debug;
+		regs[3] = R5_1_debug;
+		regs[4] = R5_2_debug;
+		regs[5] = R4_debug;
+		regs[6] = R3_debug;
+		regs[7] = R2_debug;
+		regs[8] = R1_debug;
+		regs[9] = R0_debug;
+
+	} else {
+
+		regs[0] = R7;
+		regs[1] = R6_1;
+		regs[2] = R6_2;
+		regs[3] = R5_1;
+		regs[4] = R5_2;
+		regs[5] = R4;
+		regs[6] = R3;
+		regs[7] = R2;
+		regs[8] = R1;
+		regs[9] = R0;
 	}
 }
 
 void setupPLLProgramming() {
-	//Configure the pins as IO
-	//ADF_MUXOUT <-> GPIO5[2]
-	//ADF_DATA   <-> GPIO5[5]
-	//ADF_LE     <-> GPIO5[7]
-	//ADF_CE     <-> GPIO0[9]
-	Chip_SCU_PinMuxSet(5, 2, SCU_PINIO_FAST); //5_2
-	Chip_SCU_PinMuxSet(5, 5, SCU_PINIO_FAST); //5_5
-	Chip_SCU_PinMuxSet(5, 7, SCU_PINIO_FAST); //5_7
-	Chip_SCU_PinMuxSet(0, 9, SCU_PINIO_FAST); //0_9
+	isProgrammed = FALSE;
+	setupPLLRegisters();
 
-	//Configure pins as output or input
-	//Only muxout is input
-	Chip_GPIO_SetPinDIRInput(LPC_GPIO_PORT, 5, 2);
-	//Other are output
-	Chip_GPIO_SetPinDIROutput(LPC_GPIO_PORT, 5, 5);
-	Chip_GPIO_SetPinDIROutput(LPC_GPIO_PORT, 5, 7);
-	Chip_GPIO_SetPinDIROutput(LPC_GPIO_PORT, 0, 9);
+	//Configure the pins as IO
+	//ADF_CLK <-> GPIO5[0] <-> P2_0
+	//ADF_DATA   <-> GPIO0[3] <-> P1_16
+	//ADF_LE     <-> GPIO1[12] <-> P2_12
+	//ADF_CE     <-> GPIO0[2] <-> P1_15
+	//SW2 <-> GPIO0[7] <-> P2_7
+
+	Chip_SCU_PinMuxSet(2, 7, SCU_MODE_FUNC0); //P2_7
+	Chip_SCU_PinMuxSet(2, 0, SCU_MODE_FUNC4); //P2_0
+	Chip_SCU_PinMuxSet(1, 16, SCU_MODE_FUNC0); //P1_16
+	Chip_SCU_PinMuxSet(2, 12, SCU_MODE_FUNC0); //P2_12
+	Chip_SCU_PinMuxSet(1, 15, SCU_MODE_FUNC0); //P1_15
+
+	//Configure pins as output
+	Chip_GPIO_SetPinDIROutput(LPC_GPIO_PORT, 5, 0);
+	Chip_GPIO_SetPinDIROutput(LPC_GPIO_PORT, 0, 3);
+	Chip_GPIO_SetPinDIROutput(LPC_GPIO_PORT, 1, 12);
+	Chip_GPIO_SetPinDIROutput(LPC_GPIO_PORT, 0, 2);
+
+	Chip_GPIO_SetPinOutHigh(LPC_GPIO_PORT, 0, 2); //CE
+
+	Chip_GPIO_SetPinOutHigh(LPC_GPIO_PORT, 1, 12); //LE
+
+	/* Enable and setup SysTick Timer at a periodic rate */
+	SysTick_Config(SystemCoreClock / TICKRATE_HZ1);
+}
+
+void setPin(uint8_t port, uint8_t pin, bool level) {
+	if (level) {
+		Chip_GPIO_SetPinOutHigh(LPC_GPIO_PORT, port, pin);
+	} else {
+		Chip_GPIO_SetPinOutLow(LPC_GPIO_PORT, port, pin);
+	}
 }
 
 void getClocks() {
@@ -303,13 +412,6 @@ void getClocks() {
 	gpioClk = Chip_Clock_GetRate(CLK_MX_GPIO);
 }
 
-void startPLLProgramming() {
-	Chip_GPIO_SetPinOutLow(LPC_GPIO_PORT, 5, 7);
-}
-
-void stopPLLProgramming() {
-	Chip_GPIO_SetPinOutLow(LPC_GPIO_PORT, 5, 7);
-}
 
 /**
  * @brief	main routine for program
@@ -319,29 +421,14 @@ int main(void) {
 	/* Initialize board and chip */
 	SystemCoreClockUpdate();
 	Board_Init();
+	bool inDebugMode = FALSE;
+
+	//flashLED();
 
 	setupUSB();
 	setupADC();
-//	setupPLLProgramming();
-
-	//Flash to signal beginning of setup
-	flashLED();
-
-//	startPLLProgramming();
-//	sendBitsToPLL(R7);
-//	sendBitsToPLL(R6_1);
-//	sendBitsToPLL(R6_2);
-//	sendBitsToPLL(R5_1);
-//	sendBitsToPLL(R5_2);
-//	sendBitsToPLL(R4);
-//	sendBitsToPLL(R3);
-//	sendBitsToPLL(R2);
-//	sendBitsToPLL(R1);
-//	sendBitsToPLL(R0);
-
-//	stopPLLProgramming();
-
-	flashLED();
+	setupPLLProgramming();
+	Board_Buttons_Init();
 
 	while (1) {
 		/* Sleep until next IRQ happens */
@@ -356,6 +443,24 @@ int main(void) {
 		/* Read ADC value */
 		Chip_ADC_ReadValue(LPC_ADC0, ADC_CH0, &dataADC0);
 
-		USBD_API->hw->WriteEP(hUsb, pHidCtrl->epin_adr, &dataADC0, 1);
+		sender_tasks(dataADC0);
+
+		if(isProgrammed) {
+//			debugMode = Chip_GPIO_GetPinState(LPC_GPIO_PORT, 0, 7);
+			if (!inDebugMode) {
+				debugMode = Buttons_GetStatus();
+				Board_LED_Set(1, TRUE);
+				if(debugMode) {
+					isProgrammed = FALSE;
+					currentRegister = 0;
+					inDebugMode = TRUE;
+					//				setupPLLProgramming();
+					setupPLLRegisters();
+				}
+			} else {
+				Board_LED_Set(0,TRUE);
+			}
+		}
+
 	}
 }
