@@ -32,7 +32,7 @@ print('rate:',fs);
 
 # slide variables
 samp_slide = 1000
-samp_min =6324
+samp_min =7324
 count = 0
 #samp_queue = []
 samp_queue = deque([])
@@ -87,7 +87,8 @@ while len(samp_queue)<6:
 #plt.plot(samp_queue[2])
 #f.show()
 
-
+###############################################
+# Mutex lock diff_queue here
 # get 5 diff matrices
 diff_queue = deque([])
 
@@ -109,10 +110,20 @@ for x in range (0,len(samp_queue)-1):
 #plt.draw()
 #plt.show()
 #plt.ioff()
-    
-    
-# average out diffs
 
+# unlock diff_lock mutex here
+##############################################
+    
+##############################################
+#end of part 1
+# pass diff_queue  to 2nd func
+# mutex  lock diff queue
+##############################################
+# average out diffs
+##############################################
+# start mutex lock here
+#
+##############################################
 avg_sample = np.array(diff_queue[0])
 
 for x in range(1, len(diff_queue)):
@@ -133,6 +144,10 @@ avg = [x/len(diff_queue) for x in avg_sample]
 #l.show()
 
 #x_avg = [(60* x)/ 2* math.pi for x in avg]
+
+###########################################
+#end diff_queue lock
+# start test mutex lock
 
 #########################################
 # Testing Phase
@@ -176,12 +191,12 @@ peak_index1 = peak_index0+1+np.argmax(test[peak_index0+1:])# correct offset
 #check if index1 at proper index
 #print "test[",peak_index1 ,"]", test[peak_index1]
 print "1st max: ", peak_value0
-print "1st max index: ", peak_index0
-print "2nd max: ", peak_value1
-print "2nd max index: ", peak_index1
+#print "1st max index: ", peak_index0
+#print "2nd max: ", peak_value1
+#print "2nd max index: ", peak_index1
 
 margin = (peak_value0 - peak_value1)/peak_value0
-
+#print "margin:" , margin
 if (margin <0.3):
     #test failed
     # delete test 
@@ -190,13 +205,27 @@ if (margin <0.3):
 else:
     # pass test on to next function
     print "Test passed"
+
+    
+    final = scipy.fftpack.ifft(test,len(test))
+    phase = scipy.angle(final)
+
+    #bpm = (abs(phase[peak_index0])* 60)/(2* math.pi)
+    bpm = ((peak_value0)* 60)/(2* math.pi)
+    print "Bpm: ", bpm 
+    # show me phase
+    #n=plt.figure(8)
+    #plt.title('phase...')
+    #plt.plot(phase)
+    #n.show()
+
     
 
-print "margin:" , margin
 
 
 
 
+#unlock test mutex lock 
 ########################################
 #Extraction phase
 # Use peaks from test

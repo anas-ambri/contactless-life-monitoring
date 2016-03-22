@@ -69,4 +69,13 @@ heart gif: http://www.amazing-animations.com/animated-hearts.php
 
 
 19/02/2016
-start if animation after calibration complete
+start if animation after calibration complete**
+
+20/03/2016
+
+exit with button
+
+//
+mouse info
+idVendor:           0x046D (Logitech Inc.)
+idProduct:          0xC534
