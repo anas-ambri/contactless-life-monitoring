@@ -244,7 +244,7 @@ void setupADC() {
 	Chip_ADC_SetSampleRate(LPC_ADC0, &setup, ADC_MAX_SAMPLE_RATE);
 
 	/* Setup for maximum resolution */
-	Chip_ADC_SetResolution(LPC_ADC0, &setup, ADC_10BITS);
+	Chip_ADC_SetResolution(LPC_ADC0, &setup, ADC_8BITS);
 
 	Chip_ADC_EnableChannel(LPC_ADC0, ADC_CH0, ENABLE);
 }
@@ -443,8 +443,9 @@ int main(void) {
 		/* Read ADC value */
 		Chip_ADC_ReadValue(LPC_ADC0, ADC_CH0, &dataADC0);
 
+		sendInt(dataADC0);
+
 		if(isProgrammed) {
-//			debugMode = Chip_GPIO_GetPinState(LPC_GPIO_PORT, 0, 7);
 			if (!inDebugMode) {
 				debugMode = Buttons_GetStatus();
 				Board_LED_Set(1, TRUE);

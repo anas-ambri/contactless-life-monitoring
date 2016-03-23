@@ -39,7 +39,9 @@
  ****************************************************************************/
 
 /* Buffer to hold report data */
-static uint8_t *loopback_report;
+static uint8_t *report;
+
+static uint8_t *received_report;
 
 /*****************************************************************************
  * Public types/enumerations/variables
@@ -58,7 +60,7 @@ static ErrorCode_t HID_GetReport(USBD_HANDLE_T hHid, USB_SETUP_PACKET *pSetup, u
 	/* ReportID = SetupPacket.wValue.WB.L; */
 	switch (pSetup->wValue.WB.H) {
 	case HID_REPORT_INPUT:
-		*pBuffer[0] = *loopback_report;
+		*pBuffer[0] = *report;
 		*plength = 1;
 		break;
 
@@ -85,7 +87,7 @@ static ErrorCode_t HID_SetReport(USBD_HANDLE_T hHid, USB_SETUP_PACKET *pSetup, u
 		return ERR_USBD_STALL;			/* Not Supported */
 
 	case HID_REPORT_OUTPUT:
-		*loopback_report = **pBuffer;
+		*report = **pBuffer;
 		break;
 
 	case HID_REPORT_FEATURE:
@@ -106,14 +108,14 @@ static ErrorCode_t HID_Ep_Hdlr(USBD_HANDLE_T hUsb, void *data, uint32_t event)
 		break;
 
 	case USB_EVT_OUT_NAK:
-		USBD_API->hw->ReadReqEP(hUsb, pHidCtrl->epout_adr, loopback_report, 1);
+		USBD_API->hw->ReadReqEP(hUsb, pHidCtrl->epout_adr, received_report, 1);
 		break;
 
 	case USB_EVT_OUT:
-		USBD_API->hw->ReadEP(hUsb, pHidCtrl->epout_adr, loopback_report);
+		USBD_API->hw->ReadEP(hUsb, pHidCtrl->epout_adr, received_report);
 		if (!report_pending) {
 			report_pending = 1;
-			USBD_API->hw->WriteEP(hUsb, pHidCtrl->epin_adr, &loopback_report, 1);
+			USBD_API->hw->WriteEP(hUsb, pHidCtrl->epin_adr, report, 1);
 		}
 		break;
 	}
@@ -158,11 +160,15 @@ ErrorCode_t usb_hid_init(USBD_HANDLE_T hUsb,
 
 	ret = USBD_API->hid->init(hUsb, &hid_param);
 	/* allocate USB accessible memory space for report data */
-	loopback_report =  (uint8_t *) hid_param.mem_base;
+	report =  (uint8_t *) hid_param.mem_base;
 	hid_param.mem_base += 4;
 	hid_param.mem_size += 4;
 	/* update memory variables */
 	*mem_base = hid_param.mem_base;
 	*mem_size = hid_param.mem_size;
 	return ret;
+}
+
+void sendInt(uint8_t data) {
+	*(report) = data;
 }
