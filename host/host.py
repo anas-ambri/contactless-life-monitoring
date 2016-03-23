@@ -17,66 +17,73 @@ if __name__ == '__main__':
 
 from time import sleep
 from msvcrt import kbhit
+import threading
 
 import pywinusb.hid as hid
 device = None
 
+current_data = []
+last_data = current_data
+
+def get_next():
+    return last_data
+
 def sample_handler(data):
-    print("Raw data: {0}".format(data))
+    global current_data
+    current_data.append(data[1])
     global device
     report = device.find_output_reports()[0]
     target_usage = hid.get_full_usage_id(0xff00, 0x01)
     i = int(report[target_usage].get_value())
-    print i
-    report[target_usage] = i + 1
+    report[target_usage] = 1
     report.send()
+	
+def clear_data():
+    #do your calculation here
+    global last_data
+    global current_data
+    if len(current_data) > 0:
+        print len(current_data)
+    last_data = current_data
+    current_data = []
+    threading.Timer(0.1, clear_data).start() #execute this function every 2 milliseconds
 
-def raw_test():
+def setup_device():
     # simple test
     # browse devices...
-    all_hids = hid.find_all_hid_devices()
-    if all_hids:
-        while True:
-            print("Choose a device to monitor raw input reports:\n")
-            print("0 => Exit")
-            for index, device in enumerate(all_hids):
-                device_name = unicode("{0.vendor_name} {0.product_name}" \
-                        "(vID=0x{1:04x}, pID=0x{2:04x})"\
-                        "".format(device, device.vendor_id, device.product_id))
-                print("{0} => {1}".format(index+1, device_name))
-            print("\n\tDevice ('0' to '%d', '0' to exit?) " \
-                    "[press enter after number]:" % len(all_hids))
-            index_option = raw_input()
-            if index_option.isdigit() and int(index_option) <= len(all_hids):
-                # invalid
-                break;
-        int_option = int(index_option)
-        if int_option:
-            global device
-            device = all_hids[int_option-1]
-            try:
-                device.open()
+    all_devices = hid.HidDeviceFilter(vendor_id = 0x1FC9).get_devices()
+    if all_devices:
+        device = all_devices[0]
+        print device
+        global device
+        try:
+			device.open()
 
-                #set custom raw data handler
-                device.set_raw_data_handler(sample_handler)
+			#set custom raw data handler
+			device.set_raw_data_handler(sample_handler)
 
-                report = device.find_output_reports()[0]
-                target_usage = hid.get_full_usage_id(0xff00, 0x01)
-                print target_usage
-                report[target_usage] = 1
-                report.send()
-                
-                print("\nWaiting for data...\nPress any (system keyboard) key to stop...")
-                while not kbhit() and device.is_plugged():
-                    #just keep the device opened to receive events
-                    pass
+			report = device.find_output_reports()[0]
+			target_usage = hid.get_full_usage_id(0xff00, 0x01)
+			report[target_usage] = 1
+			report.send()
+			
+			print("\nWaiting for data...\nPress any (system keyboard) key to stop...")
+			while not kbhit() and device.is_plugged():
+				#just keep the device opened to receive events
+				pass
 
-                return
-            finally:
-                device.close()
+			return
+        finally:
+			device.close()
+
     else:
         print("There's not any non system HID class device available")
 #
+
+def init():
+    clear_data()
+    setup_device()
+
 if __name__ == '__main__':
     # first be kind with local encodings
     import sys
@@ -88,4 +95,5 @@ if __name__ == '__main__':
         # allow to show encoded strings
         import codecs
         sys.stdout = codecs.getwriter('mbcs')(sys.stdout)
-    raw_test()
+	init()
+	
