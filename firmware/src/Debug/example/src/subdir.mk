@@ -5,22 +5,22 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../example/src/cr_startup_lpc43xx.c \
-../example/src/hid_desc.c \
-../example/src/hid_generic.c \
+../example/src/libusbdev.c \
+../example/src/libusbdev_desc.c \
 ../example/src/main.c \
 ../example/src/sysinit.c 
 
 OBJS += \
 ./example/src/cr_startup_lpc43xx.o \
-./example/src/hid_desc.o \
-./example/src/hid_generic.o \
+./example/src/libusbdev.o \
+./example/src/libusbdev_desc.o \
 ./example/src/main.o \
 ./example/src/sysinit.o 
 
 C_DEPS += \
 ./example/src/cr_startup_lpc43xx.d \
-./example/src/hid_desc.d \
-./example/src/hid_generic.d \
+./example/src/libusbdev.d \
+./example/src/libusbdev_desc.d \
 ./example/src/main.d \
 ./example/src/sysinit.d 
 

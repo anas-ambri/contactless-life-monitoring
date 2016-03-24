@@ -79,8 +79,7 @@ example/src/main.o example/src/main.d: ../example/src/main.c \
  C:\nxp\LPCXpresso_8.0.0_526\lpcxpresso\Examples\LPCOpen\lpcopen_2_12_lpcxpresso_ngx_xplorer_4330\lpc_chip_43xx\inc\usbd/usbd_hid.h \
  C:\nxp\LPCXpresso_8.0.0_526\lpcxpresso\Examples\LPCOpen\lpcopen_2_12_lpcxpresso_ngx_xplorer_4330\lpc_chip_43xx\inc\usbd/usbd_cdcuser.h \
  C:\nxp\LPCXpresso_8.0.0_526\lpcxpresso\Examples\LPCOpen\lpcopen_2_12_lpcxpresso_ngx_xplorer_4330\lpc_chip_43xx\inc\usbd/usbd_cdc.h \
- C:\Users\Team04\Documents\contactless-life-monitoring\firmware\src\example\inc/hid_generic.h \
- C:\Users\Team04\Documents\contactless-life-monitoring\firmware\src\example\inc/app_usbd_cfg.h
+ C:\Users\Team04\Documents\contactless-life-monitoring\firmware\src\example\inc/libusbdev.h
 
 C:\nxp\LPCXpresso_8.0.0_526\lpcxpresso\Examples\LPCOpen\lpcopen_2_12_lpcxpresso_ngx_xplorer_4330\lpc_board_ngx_xplorer_4330\inc/board.h:
 
@@ -242,6 +241,4 @@ C:\nxp\LPCXpresso_8.0.0_526\lpcxpresso\Examples\LPCOpen\lpcopen_2_12_lpcxpresso_
 
 C:\nxp\LPCXpresso_8.0.0_526\lpcxpresso\Examples\LPCOpen\lpcopen_2_12_lpcxpresso_ngx_xplorer_4330\lpc_chip_43xx\inc\usbd/usbd_cdc.h:
 
-C:\Users\Team04\Documents\contactless-life-monitoring\firmware\src\example\inc/hid_generic.h:
-
-C:\Users\Team04\Documents\contactless-life-monitoring\firmware\src\example\inc/app_usbd_cfg.h:
+C:\Users\Team04\Documents\contactless-life-monitoring\firmware\src\example\inc/libusbdev.h:

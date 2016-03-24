@@ -75,9 +75,10 @@ extern "C"
 #define USB_init_pin_clk        Chip_USB1_Init
 #endif
 
-/* HID In/Out Endpoint Address */
-#define HID_EP_IN       0x81
-#define HID_EP_OUT      0x01
+#define LUSB_PID                        0x8A
+#define LUSB_IN_EP                      0x81
+#define LUSB_OUT_EP                     0x01
+#define LUSB_INT_EP                     0x82
 
 /* On LPC18xx/43xx the USB controller requires endpoint queue heads to start on
    a 4KB aligned memory. Hence the mem_base value passed to USB stack init should
@@ -92,15 +93,8 @@ extern uint8_t USB_HsConfigDescriptor[];
 extern uint8_t USB_FsConfigDescriptor[];
 extern const uint8_t USB_StringDescriptor[];
 extern const uint8_t USB_DeviceQualifier[];
-
-/**
- * @brief	Find the address of interface descriptor for given class type.
- * @param	pDesc		: Pointer to configuration descriptor in which the desired class
- *			interface descriptor to be found.
- * @param	intfClass	: Interface class type to be searched.
- * @return	If found returns the address of requested interface else returns NULL.
- */
-extern USB_INTERFACE_DESCRIPTOR *find_IntfDesc(const uint8_t *pDesc, uint32_t intfClass);
+extern const uint8_t WCID_String_Descriptor[];
+extern const uint8_t WCID_CompatID_Descriptor[];
 
 /**
  * @}
