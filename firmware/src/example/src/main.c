@@ -42,7 +42,7 @@
 static uint16_t indexData = 0;
 
 /* The size of the packet buffer. */
-#define PACKET_BUFFER_SIZE        1024
+#define PACKET_BUFFER_SIZE        576
 
 /* Application defined LUSB interrupt status  */
 #define LUSB_DATA_PENDING       _BIT(0)
@@ -134,24 +134,6 @@ void flashLED() {
 }
 
 
-//Timer
-void setupTimer() {
-	/* Initialize RITimer */
-	Chip_RIT_Init(LPC_RITIMER);
-
-	/* Configure RIT for a 1s interrupt tick rate */
-	Chip_RIT_SetTimerInterval(LPC_RITIMER, TIME_INTERVAL);
-
-	NVIC_EnableIRQ(RITIMER_IRQn);
-}
-
-void RIT_IRQHandler(void) {
-	if(libusbdev_Connected() != 0) {
-		libusbdev_QueueSendReq(g_rxBuff, PACKET_BUFFER_SIZE);
-	}
-}
-
-
 //PLL functions
 
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
@@ -198,10 +180,21 @@ void SysTick_Handler(void) {
 				    	currentRegister = 0;
 			    	}
 
-			    	//Board_LED_Set(1, FALSE);
+			    	Board_LED_Set(1, FALSE);
 			    }
 			}
 
+		}
+	} else {
+		if(clkState) {
+			if(libusbdev_QueueSendDone() == 0) {
+				/* Queue send request */
+
+				libusbdev_QueueSendReq(g_rxBuff, PACKET_BUFFER_SIZE);
+			}
+
+			memset(&g_rxBuff, 0, PACKET_BUFFER_SIZE);
+			indexData = 0;
 		}
 	}
 
@@ -321,12 +314,13 @@ int main(void) {
 	setupADC();
 	setupPLLProgramming();
 	Board_Buttons_Init();
-	setupTimer();
+
+	while (libusbdev_Connected() == 0) {
+		/* Sleep until next IRQ happens */
+		__WFI();
+	}
 
 	while (1) {
-		/* Sleep until host is connected */
-		//__WFI();
-
 		/* Start A/D conversion */
 		Chip_ADC_SetStartMode(LPC_ADC0, ADC_START_NOW, ADC_TRIGGERMODE_RISING);
 
@@ -337,8 +331,10 @@ int main(void) {
 		/* Read ADC value */
 		Chip_ADC_ReadValue(LPC_ADC0, ADC_CH0, &dataADC0);
 
-		g_rxBuff[indexData] = dataADC0;
-		indexData++;
+		if(indexData < PACKET_BUFFER_SIZE){
+			g_rxBuff[indexData] = dataADC0;
+			indexData++;
+		}
 
 		/*
 		if(isProgrammed) {
@@ -349,7 +345,7 @@ int main(void) {
 					isProgrammed = FALSE;
 					currentRegister = 0;
 					inDebugMode = TRUE;
-					//				setupPLLProgramming();
+					//	setupPLLProgramming();
 					setupPLLRegisters();
 				}
 			} else {

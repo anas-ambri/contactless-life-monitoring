@@ -1,9 +1,14 @@
 import usb.core
+import time
 
-def list_devices():
+def print_data(file):
     dev = usb.core.find()
-    while 1:
-        dev.read(0x81, 4)
+    ret = dev.read(0x81, 576)
+    start = time.time()
+    while time.time() - start < 10:
+        ret = dev.read(0x81, 576)
+        print >> file, "\n".join(str(x) for x in list(ret) if x != 0)
+        print >> file, "\n"
                 
 
 if __name__ == '__main__':
@@ -17,5 +22,8 @@ if __name__ == '__main__':
         # allow to show encoded strings
         import codecs
         sys.stdout = codecs.getwriter('mbcs')(sys.stdout)
-	list_devices()
+	file = open('output.txt', 'a')
+	print_data(file)
+	file.close()
+	
 	
