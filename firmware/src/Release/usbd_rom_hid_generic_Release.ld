@@ -5,11 +5,11 @@
  * Generated linker script file for LPC4330
  * Created from linkscript.ldt by FMCreateLinkLibraries
  * Using Freemarker v2.3.23
- * LPCXpresso v8.0.0 [Build 526] [2015-11-23]  on Mar 26, 2016 6:43:45 PM
+ * LPCXpresso v8.0.0 [Build 526] [2015-11-23]  on Mar 26, 2016 6:55:14 PM
  */
 
-INCLUDE "usbd_rom_hid_generic_Debug_library.ld"
-INCLUDE "usbd_rom_hid_generic_Debug_memory.ld"
+INCLUDE "usbd_rom_hid_generic_Release_library.ld"
+INCLUDE "usbd_rom_hid_generic_Release_memory.ld"
 
 ENTRY(ResetISR)
 
