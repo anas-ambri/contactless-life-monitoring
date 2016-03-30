@@ -7,6 +7,8 @@ from collections import deque
 import math
 import scipy.fftpack
 import time
+from scipy import signal
+from scipy.signal import find_peaks_cwt
 
 
 #mark time
@@ -19,20 +21,31 @@ start_time = time.time()
 #
 #######################################
 
-testfile = '../wavs/static2monoshort.wav'
-
-fs,data = wavfile.read(testfile)
-
-
-
-dat_length = data.size     #
+#testfile = '../wavs/static2monoshort.wav'
+#fs,data = wavfile.read(testfile)
+#dat_length = data.size     #
 #dat_sample = data[6324:6424]
-print('length:',dat_length);
-print('rate:',fs);
+#print('length:',dat_length);
+#print('rate:',fs);
+
+
+#######################################
+# Aquire test samples from file
+# 
+#
+#
+#######################################
+#file = open('10_sec_heavy_breathing_non_exagerated.txt', "r")
+file = open('testread.txt', "r")
+strnumbers = file.read().split()
+data= map(int, strnumbers)
+print len(data)
+#polyShape= map(int, strnumbers)
+#print polyShape
 
 # slide variables
-samp_slide = 1000
-samp_min =7324
+samp_slide = 576
+samp_min =0
 count = 0
 #samp_queue = []
 samp_queue = deque([])
@@ -45,7 +58,7 @@ samp_queue = deque([])
 #wav_len corresponds to wavelength
 
 #########################################
-
+fs = 5.8 *( 10e9)
 wav_len =300000000/float(fs)
 
 
@@ -61,10 +74,11 @@ while len(samp_queue)<6:
     hold = []
     for x in range (0,len(dat_sample)):
         # vital radio eq
-        value = float((2* math.pi* dat_sample[x]))/wav_len
+        #value = float((2* math.pi* (dat_sample[x]/1000.0)))/wav_len
         # rounding values -- just for checking
-        val = float("{0:.6f}".format(value))
-        hold.append(val)
+        #val = float("{0:.6f}".format(value))
+        #hold.append(val)
+        hold.append(dat_sample[x])
     #samp_queue.append(dat_sample)
     hold2 =scipy.fftpack.fft(hold,len(hold))
     samp_queue.append(hold)
@@ -105,11 +119,6 @@ for x in range (0,len(samp_queue)-1):
 #plt.plot(diff_queue[0])
 #f.show()
 
-# TODO -- fix "not responding" matplotlib
-#plt.ion()
-#plt.draw()
-#plt.show()
-#plt.ioff()
 
 # unlock diff_lock mutex here
 ##############################################
@@ -131,8 +140,8 @@ for x in range(1, len(diff_queue)):
     avg_sample = avg_sample + d1
 
 #  x axis numbers 
-dt = 0.0125
-t= np.arange(0.0, 12.5,0.0125)
+dt = 12.0/samp_slide
+t= np.arange(0.0, 12.0,dt)
 
 
 avg = [x/len(diff_queue) for x in avg_sample]
@@ -162,10 +171,11 @@ avg = [x/len(diff_queue) for x in avg_sample]
 # test pendings ends
 
 #########################################
-fft_avg = scipy.fftpack.fft(avg,len(avg))
+fft_avg = scipy.fftpack.ifft(avg,len(avg))
 freq = np.fft.fftfreq(len(avg), dt)
 print "Avg length: ", len(fft_avg)
 print "freq length: ",len(freq)
+
 
 # show me fft_avg
 #j=plt.figure(7)
@@ -175,15 +185,46 @@ print "freq length: ",len(freq)
 
 test =abs(fft_avg[:len(fft_avg)/2])
 
+freq2 = freq[:len(fft_avg)/2]
+freq3 = [((x*60)/(2*math.pi)) for  x in freq2]
+
+
 # show me test
-#m=plt.figure(8)
-#plt.title('test..')
-#plt.plot(test)
-#m.show()
+m=plt.figure(8)
+plt.title('test..')
+plt.plot(freq3,test)
+m.show()
 
 # automated find of first max and preceeding max
-peak_value0 = np.amax(test)
-peak_index0 = np.argmax(test)
+
+#peak_value0 = np.amax(test)
+#peak_index0 = np.argmax(test)
+
+#if (peak_index0 == 0):
+#   peak_value0 = np.amax(test[1:])
+#   peak_index0 = np.argmax(test[1:])
+peak_value0 = test[1]
+peak_index0 =1
+allow = True
+
+if (test[0]<test[1]): #graph started on a low,now increasing
+    peak_value0 = np.amax(test[1:])
+    peak_index0 = np.argmax(test[1:])
+    
+else:   # graph decreasing
+    # find low point first
+    loc_min=1
+    loc_ind= 1
+    for x in range(1, len(test)):
+        if (loc_min > test [x]):
+            loc_min = test[x]
+            loc_ind = x
+        else:
+            break;
+    peak_value0 = np.amax(test[loc_ind+1:])
+    peak_index0 = loc_ind+1+np.argmax(test[loc_ind+1:])# correct offset
+        
+print "Peak index" , peak_index0
 
 peak_value1 = np.amax(test[peak_index0+1:])
 peak_index1 = peak_index0+1+np.argmax(test[peak_index0+1:])# correct offset
@@ -211,7 +252,8 @@ else:
     phase = scipy.angle(final)
 
     #bpm = (abs(phase[peak_index0])* 60)/(2* math.pi)
-    bpm = ((peak_value0)* 60)/(2* math.pi)
+    #bpm = ((peak_value0)* 60)/(2* math.pi)
+    bpm = peak_index0
     print "Bpm: ", bpm 
     # show me phase
     #n=plt.figure(8)
