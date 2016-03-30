@@ -336,7 +336,7 @@ int main(void) {
 			indexData++;
 		}
 
-		/*
+
 		if(isProgrammed) {
 			if (!inDebugMode) {
 				debugMode = Buttons_GetStatus();
@@ -351,7 +351,7 @@ int main(void) {
 			} else {
 				Board_LED_Set(0,TRUE);
 			}
-		}*/
+		}
 
 	}
 }
