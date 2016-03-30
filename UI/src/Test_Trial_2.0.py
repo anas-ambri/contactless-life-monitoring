@@ -10,7 +10,11 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.progressbar import ProgressBar
 from kivy.properties import NumericProperty, BooleanProperty ,StringProperty,ListProperty
 
+import usb.core
+import time
 
+dev = usb.core.find()
+dev.read(0x81, 576)
 
 import sys
 import time
@@ -376,7 +380,9 @@ class MainScreen(Screen):
         
     #get me unit batch 
     def getnext(self, *args):
-        print "it me!!!" 
+        global dev
+        ret = dev.read(0x81, 576)
+        return ret
 
     # algorithm
     def algo(self,*args):
@@ -388,7 +394,7 @@ class MainScreen(Screen):
                 for x in range(0, 6):
                     #mark time
                     start_time1 = time.time() 
-                    self.getnext(self, *args)
+                    values = self.getnext(self, *args)
                     end_time1 = time.time()
                     print "Exec:", end_time1-start_time1
                     #sleep(0.001)
