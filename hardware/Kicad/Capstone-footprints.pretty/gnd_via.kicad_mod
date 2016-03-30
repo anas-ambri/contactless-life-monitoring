@@ -1,0 +1,9 @@
+(module gnd_via (layer F.Cu) (tedit 56CF4C05)
+  (fp_text reference REF** (at 0.0635 1.3462) (layer F.SilkS) hide
+    (effects (font (size 1 1) (thickness 0.15)))
+  )
+  (fp_text value gnd_via (at 0.0381 -1.4224) (layer F.Fab) hide
+    (effects (font (size 1 1) (thickness 0.15)))
+  )
+  (pad 1 thru_hole circle (at 0 0) (size 0.65 0.65) (drill 0.35) (layers *.Cu))
+)

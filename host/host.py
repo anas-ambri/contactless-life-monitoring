@@ -49,14 +49,16 @@ def raw_test():
             device = all_hids[int_option-1]
             try:
                 device.open()
-
+               
                 #set custom raw data handler
                 device.set_raw_data_handler(sample_handler)
                 
                 print("\nWaiting for data...\nPress any (system keyboard) key to stop...")
+                              
                 while not kbhit() and device.is_plugged():
                     #just keep the device opened to receive events
                     pass
+                    
 
                 return
             finally:

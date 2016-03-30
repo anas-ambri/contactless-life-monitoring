@@ -45,11 +45,10 @@ Builder.load_string("""
     Widget:
         Button:
             text: 'Start'
-       #     size: 100,50
+       #    size: 100,50
             size: 200,50
             font_size:'20sp'
-       #     pos: 80,50
-       #     pos: (root.width/2)-50,50
+       #    pos: (root.width/2)-50,50
             pos: (root.width/2)-100,75
             color: 153, 153, 102
             bold: True
@@ -58,13 +57,13 @@ Builder.load_string("""
                 root.manager.current = 'settings'
                 root.setmainstate(self,*args)
         #Button:
-        #    text: 'Quit'
+        #   text: 'Quit'
         #    size: 100,50
         #    font_size:'20sp'
         #    pos: root.width-130,50
         #    color: 153, 153, 102
         #    bold: True
-        #    on_press:root.close(self,*args)
+        #    on_press:root.close(event)
             
         Label:
             text:'cVitals'
@@ -72,8 +71,8 @@ Builder.load_string("""
             color: 0,255,255,1
             bold:True
             pos: (root.width/2)-50,(root.height/2)+100
+            
         # Image made by Freepik at:http://www.flaticon.com/free-icon/fingerprint-heart-shape_32692
-        
         #Image:
         #    source: '..\Icons\shape.png'
         #    size: 150,150
@@ -115,10 +114,10 @@ Builder.load_string("""
                 #http://www.flaticon.com/free-icon/heart-black-shape_46029
                 source: '..\Icons\heart-black-shape.png'
                 size: 75,75
-            Label:
                 
-                text: root.heart_rate
+            Label:
                 id: heart_label
+                text: root.heart_rate
                 color: root.h_monitor
                 font_size:'125sp'
                
@@ -158,7 +157,8 @@ Builder.load_string("""
                 font_size:'125sp'
         
         Label:
-        #    text: 'Calibration :{}%'.format(int(cal_prog.value))# cal_prog is an id
+        #   cal_prog is an id
+        #   text: 'Calibration :{}%'.format(int(cal_prog.value))
             text: root.cal_display
             size_hint_x:None
             font_size:'25sp'
@@ -185,27 +185,8 @@ Builder.load_string("""
             on_press:
                 #root.start_cal(self, *args)
                 root.resetrates(self, *args)
-                #root.cal_pop.open()
-
-        #Button:
-        #    text: 'Stop'
-        #    size: 80,40
-        #    pos: (root.width/4)-40,50
-        #    color: 153, 153, 102
-            #on_press:
-                #root.stop_refresh(self, *args)
-                
-            
-        
-
-        #Button:
-        #    text: 'New Patient'
-        #    size: 150,40
-        #    pos: (root.width * 3/4)-40,50
-        #    color: 153, 153, 102
-        #    on_release:
-        #        root.resetrates(self, *args)
-            
+                #root.cal_pop.open()   
+          
         Button:
             id:bye_felicia
             text: 'Return'
@@ -220,20 +201,6 @@ Builder.load_string("""
                 root.manager.current = 'menu'
                 root.setwelcstate(self,*args)
 
-
-    #Popup:
-        #id: cal_pop
-        #title: 'Calibration :{}%'.format(int(cal_prog.value))
-        #pos:(root.width/2)-40,150
-        #size_hint:None, None
-        #size: 250,40
-        
-        #ProgressBar:
-            #pos:(root.width/2)-40,150
-            #id: cal_prog
-            #size_hint_x: 1.0
-            #size_hint_y: None
-            #value: root.cal_progress
             
 
 """)
@@ -249,7 +216,9 @@ class WelcomeScreen(Screen):
         s_state = 1
         
     #exit function
-    def close(self,*args):
+    # not complete yet
+    def close(event):
+        
         sys.exit()
     
 
@@ -258,6 +227,7 @@ class MainScreen(Screen):
     breath_rate = StringProperty()
     cal_progress = NumericProperty(0)
     cal_display = StringProperty()
+    # cal_start - marks that cal has started, false if not started
     cal_start = BooleanProperty(False)
     cal_done = BooleanProperty(False)
 
@@ -266,7 +236,9 @@ class MainScreen(Screen):
     b_monitor = ListProperty([1,1,1,1])
     
     
-    #allow update of rates in all respects-screen and back-end 
+    #allow update of rates in all respects-screen and back-end
+    # used to be used in stop function
+    #
     can_refresh = BooleanProperty(True)
     accept_data = BooleanProperty(False)
 
@@ -291,6 +263,7 @@ class MainScreen(Screen):
         #print('cal_clock called')
         #print (self.cal_start)
         if (not(self.cal_start)):
+            # if calibration has not been started dont display calibration progress
             self.cal_display = str('')
             #self.cal_display = str('Calibration :{}%'.format(int(self.cal_progress)))
         
@@ -362,6 +335,7 @@ class MainScreen(Screen):
         
     # calculate rates
     def ratecalculation(self, *args):
+        # using ui mock data
         global i,breath,heart,h_buffer,b_buffer,first_v
 
         if(self.can_refresh and self.accept_data):
@@ -376,6 +350,8 @@ class MainScreen(Screen):
                 (i +1)%10
         print('Heart:' ,heart)
         print('Breath:' , breath)
+
+        # using real data
 
     # On return: clear screen and reset all data
     
@@ -407,12 +383,8 @@ sm.add_widget(MainScreen(name='settings'))
 class TestApp(App):
       
     title = 'cVitals'
-    #icon = '..\Icons\cVitals-icon3.png'
-    #icon =  '..\Icons\shape_32.png'
     icon =  '..\Icons\medical_32.png'
-    def build(self):
-        #Clock.schedule_interval(tickup, 1)
-         
+    def build(self):        
         Clock.schedule_interval(self.op_clock, 1)
         return sm
 
@@ -424,8 +396,6 @@ class TestApp(App):
 
 #app runtime + rate update interval 
     def op_clock(self, dt):
-        #self.time = time()
-        #print(self.time)
         global ticks
         global s_state
         ticks=(ticks+1)%10
@@ -435,13 +405,6 @@ class TestApp(App):
             print ('Log: Current Screen->welc')
         else:
             print ('Log: Current Screen->main')
-
-
-#    def tickup(dt):
-#        ticks = ticks + 1
-#        cal_prog.value = ticks
-
-
 
 
 if __name__ == '__main__':

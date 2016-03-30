@@ -42,6 +42,7 @@ def click_signal(target_usage, target_vendor_id):
     #
 if __name__ == '__main__':
     target_vendor_id = 0x1FC9 # just an example, change it to the actual vendor_id
+    #target_vendor_id = 0x046D # just an example, Tiiso's mouse
     target_usage = hid.get_full_usage_id(0xffa0, 0x02) # generic vendor page, usage_id = 2
     # go for it!
     click_signal(target_usage, target_vendor_id)

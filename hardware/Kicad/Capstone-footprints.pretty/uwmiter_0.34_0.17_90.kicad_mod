@@ -1,0 +1,10 @@
+(module uwmiter_0.34_0.17_90 (layer F.Cu) (tedit 56CEFFD7)
+  (fp_text reference F2 (at 0 1.34) (layer F.SilkS) hide
+    (effects (font (size 0.7 0.8) (thickness 0.15)))
+  )
+  (fp_text value BEND (at 0 2.34) (layer F.SilkS) hide
+    (effects (font (size 0.7 0.8) (thickness 0.15)))
+  )
+  (fp_poly (pts (xy 0 0) (xy 0.34 0) (xy 0.34 0.17) (xy 0.51 0.17)
+    (xy 0.509999 0.51) (xy 0.3808 0.51) (xy 0 0.129199) (xy 0 0)) (layer F.Cu) (width 0))
+)
